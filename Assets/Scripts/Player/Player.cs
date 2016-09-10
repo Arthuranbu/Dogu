@@ -47,7 +47,7 @@ namespace Dogu
             //onFloor = true;
             //Hp stat useless now with heart system in place, will could put them in sync and play only half animation depending on hp, but eh hmm.
             playerStats.hp = 10;
-            playerStats.speedAmp = 100;
+            playerStats.speedAmp = 50;
             playerStats.dmg = 4;
             //Saves initial values, prob better way to make this more modular since using in enemies too, only thing could think of is making them ALL under base class livingThing or something. I could do that. would be best, so I'll keep off doing stats for enemies and just handle spawning and moving first.
             initPlayerStats = new GeneralUse.Stats(playerStats.hp, playerStats.speedAmp, playerStats.dmg);
@@ -76,7 +76,7 @@ namespace Dogu
         {
             
             //Moving this block to a function later.
-           /* float jumpVal = Input.GetAxis("Jump");
+            float jumpVal = Input.GetAxis("Jump");
             float horizontalVal = Input.GetAxis("Horizontal");
 
 
@@ -98,24 +98,24 @@ namespace Dogu
                 PlayAnimation();
                 StartCoroutine(Jump());
             }
-            */
+            
         }
         IEnumerator Jump()
         {
             _doneJumping = false;
             Vector3 initPos = transform.position;
  
-            yield return new WaitUntil( () =>
-            {
+            
                 //Jump up loop
                 do
-                    transform.Translate(transform.up * Time.deltaTime * jumpHeight);
+                {
+                    transform.Translate(transform.up * Time.deltaTime * gravity/2);
+                    yield return new WaitForEndOfFrame();
+                }
                 while (transform.position.y <= initPos.y + jumpHeight);
-                return true;
-            });
+                
+           
 
-            //This extra delay is for a small float period.
-            yield return new WaitForSeconds(0.13f);
  
             //Starts to go down from here, like life.
             _doneJumping = true;
@@ -148,7 +148,7 @@ namespace Dogu
        
         public void PlayAnimation()
         {
-            playerAnims.Play(GeneralUse.AnimStates[currentState]);
+            playerAnims.SetTrigger(GeneralUse.AnimStates[currentState]);
         }
         void PlayHUDAnimation(GameObject UIElement,string state)
         {

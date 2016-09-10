@@ -7,7 +7,7 @@ namespace Dogu
     /// Base won't have attack interval and will only attack if player in vicinity for attacking.
     /// Spearmen will have attack interval.
     /// </summary>
-    public class Enemy : MonoBehaviour, Animations
+    public abstract class Enemy : MonoBehaviour, Animations
     {
         //Might need to add delay a bit
         //I should have a handler class that handles this, but will write that later, that's more of a polish.
@@ -27,6 +27,7 @@ namespace Dogu
 
         public bool Dead
         { get; set; }
+
         public void Die()
         {
             currentState = GeneralUse.CurrentAnimState.DYING;
@@ -63,24 +64,20 @@ namespace Dogu
                 
                 if (player.OnFloor)
                     EnemyMovement();
-
                 //Will turn off loop for idle and just always call update so it loops via calling, that way won't have to repeat calling playanimation
                 PlayAnimation();
             }
         }
 
         #region Enemy Movement
-        private void EnemyMovement()
-        {
+        protected abstract void EnemyMovement();
+        /*{
+            //This will differ from enemy to enemy.
             bool inVicinity = CheckDistance();
           
             if (!inVicinity && currentState != GeneralUse.CurrentAnimState.ATTACKING)
             {
 
-                /* float direction = 1.0f;
-                 if (player.transform.position.x - transform.position.x < 0)
-                     direction *= -1;*/
-                //float direction = player.transform.position.x - transform.position.x;
                 Vector2 myPos = new Vector2(transform.position.x, transform.position.y);
                 Vector2 targetPos = new Vector2(player.transform.position.x,player.transform.position.y);
              
@@ -89,14 +86,14 @@ namespace Dogu
                 currentState = GeneralUse.CurrentAnimState.MOVING;
                    // enemyAnims.Play(GeneralUse.AnimStates[currentState]);
             }
-        }
+        }*/
+        //This is used by all derivative of Enemy.
         bool CheckDistance()
         {
             bool inVicinity;
             float vicinity = player.GetComponent<CapsuleCollider>().radius;
             float dis = player.transform.position.x - transform.position.x;
             
-
             //Checks if distance is same as distance between player and its hitbox.
             if (dis != vicinity)
             {
@@ -124,16 +121,16 @@ namespace Dogu
             if (other.CompareTag("Player") && !Dead && player.OnFloor)
             {
                 stillInRange = true;
-
+                //Is in range of player so start attacking anim 
                 currentState = GeneralUse.CurrentAnimState.ATTACKING;
                 if (!doingPostAction)
                 {
                     StartCoroutine(PostAnimActions());
                 }
-
             }
         }
-        //Virtual because spearmen will probably run instead of keep attacking to stay ranged
+       
+        //This is pretty general too.
         protected virtual void OnTriggerStay(Collider other)
         {
             if (other.CompareTag("Player") && !Dead && player.OnFloor)
@@ -168,34 +165,32 @@ namespace Dogu
         public GeneralUse.CurrentAnimState currentState
         {
             set;
-            get;//Going to add more to this too 
+            get;
         }
         public void PlayAnimation()
         {
             //Difference in this implentation will basically be adding all the extra checks I have cluttered in there and put in here
-            
-               
             enemyAnims.Play(GeneralUse.AnimStates[currentState]);
             
         }
         IEnumerator PostAnimActions()
         {
-            //Speed is equal to whatever current state is. Would have get stateinfo if 
-            //had multiple errors but it auto sees only one and sees that as default layer
-            //and gets that.
             doingPostAction = true;
             GeneralUse.CurrentAnimState prevState = currentState;
             if (Dead)
                 Debug.Log(currentState);
+
             if (currentState != GeneralUse.CurrentAnimState.DYING)
                 yield return new WaitForSeconds(enemyAnims.speed / 2);
             else
                 yield return new WaitForSeconds(enemyAnims.speed);
+
             switch (currentState)
             {
                 case GeneralUse.CurrentAnimState.ATTACKING:
                     {
                       
+                        //This remains the same.
                         if (stillInRange)
                         {
                             player.DecreasePlayerHP();
@@ -204,8 +199,10 @@ namespace Dogu
                     break;
                 case GeneralUse.CurrentAnimState.DYING:
                     {
-                        if (prevState == GeneralUse.CurrentAnimState.ATTACKING)
-                            yield return new WaitForSeconds(enemyAnims.speed);
+                        //This is fine, delay is so attack anim goes through before dying, maybe just force the death
+                        /*if (prevState == GeneralUse.CurrentAnimState.ATTACKING)
+                            yield return new WaitForSeconds(enemyAnims.speed);*/
+                            //leave in but commented out
                         Destroy(gameObject);
                     }
                         break;

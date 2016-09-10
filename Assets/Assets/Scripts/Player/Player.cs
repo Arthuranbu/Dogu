@@ -148,7 +148,7 @@ namespace Dogu
        
         public void PlayAnimation()
         {
-            playerAnims.Play(GeneralUse.AnimStates[currentState]);
+            playerAnims.SetTrigger(GeneralUse.AnimStates[currentState]);
         }
         void PlayHUDAnimation(GameObject UIElement,string state)
         {
