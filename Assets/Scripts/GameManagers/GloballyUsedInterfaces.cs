@@ -9,6 +9,7 @@ namespace Dogu
     {
         void PlayAnimation();
         GeneralUse.CurrentAnimState currentState { get; set; }
+        
     }
 
     public static class GeneralUse
@@ -43,19 +44,6 @@ namespace Dogu
             DYING,
             SHOOTING
         }
-        
-        public enum GameTypes
-        {
-            WAVE,
-            TIME,
-            COLLECT
-
-        }
-        //Put the enemy you made into here
-        /*public static Enemy[] allEnemies = new Enemy[3]
-        {
-            
-        }*/
        //Will play states directly, will save triggers and params like that for more specificity.
         ///0:Idle,1:Move,2:Attack,3:Hit,4:Die,5:Shoot
         public static Dictionary<CurrentAnimState,string> AnimStates = new Dictionary<CurrentAnimState, string>()
