@@ -39,6 +39,7 @@ namespace Dogu
         {
             IDLE,
             MOVING,
+            STOPPING,
             ATTACKING,
             HIT,
             DYING,
@@ -50,6 +51,7 @@ namespace Dogu
          {
             {CurrentAnimState.IDLE, "Idle" },
             {CurrentAnimState.MOVING, "Move" },
+            {CurrentAnimState.STOPPING,"Stop" },
             {CurrentAnimState.ATTACKING, "Attack" },
             {CurrentAnimState.HIT, "Hit" },
             {CurrentAnimState.DYING, "Die"},
