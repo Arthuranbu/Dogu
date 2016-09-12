@@ -7,7 +7,7 @@ namespace Dogu
     /// Base won't have attack interval and will only attack if player in vicinity for attacking.
     /// Spearmen will have attack interval.
     /// </summary>
-    public class Enemy : MonoBehaviour, Animations
+    public abstract class Enemy : MonoBehaviour, Animations
     {
         //Might need to add delay a bit
         //I should have a handler class that handles this, but will write that later, that's more of a polish.
@@ -16,7 +16,7 @@ namespace Dogu
         private bool stillInRange;
         protected bool doingPostAction;
 
-        GeneralUse.Stats EnemyStats;
+        protected GeneralUse.Stats EnemyStats;
         protected Animator enemyAnims;
         int directionMovement;
 
@@ -56,7 +56,7 @@ namespace Dogu
 
         }
        
-        protected void Update()
+        protected virtual void Update()
         {
             if (Prepped && !Dead && !player.Dead)
             {
@@ -71,53 +71,10 @@ namespace Dogu
 
         #region Enemy Movement
         //This will vary from enemy to enemy so will be abstract.
-        private void EnemyMovement()
-        {
-            bool inVicinity = CheckDistance();
-          
-            if (!inVicinity && currentState != GeneralUse.CurrentAnimState.ATTACKING)
-            {
-
-                /* float direction = 1.0f;
-                 if (player.transform.position.x - transform.position.x < 0)
-                     direction *= -1;*/
-                //float direction = player.transform.position.x - transform.position.x;
-                Vector2 myPos = new Vector2(transform.position.x, transform.position.y);
-                Vector2 targetPos = new Vector2(player.transform.position.x,player.transform.position.y);
-             
-                //Stupid but this works if 3d object and moving in 2d, BUT now attacking doesn't work, wtf;
-                transform.position = Vector3.MoveTowards(transform.position, targetPos, Time.deltaTime * EnemyStats.speedAmp);
-                currentState = GeneralUse.CurrentAnimState.MOVING;
-                   // enemyAnims.Play(GeneralUse.AnimStates[currentState]);
-            }
-        }
+        protected abstract void EnemyMovement();
+        
         //this is active for all, scratch that, only ghosts will chase player so only applies to them
-        bool CheckDistance()
-        {
-            bool inVicinity;
-            float vicinity = player.GetComponent<CapsuleCollider>().radius;
-            float dis = player.transform.position.x - transform.position.x;
-            
-
-            //Checks if distance is same as distance between player and its hitbox.
-            if (dis != vicinity)
-            {
-                inVicinity = false;
-                if (dis < 0)
-                {
-                    GetComponentInChildren<SpriteRenderer>().flipX = false;
-                }
-                else
-                {
-                    GetComponentInChildren<SpriteRenderer>().flipX = true;
-                }
-
-            }
-            else
-                inVicinity = true;
-
-            return inVicinity;
-        }
+        
         #endregion
 
         #region On Collision Events
@@ -177,7 +134,7 @@ namespace Dogu
             //Difference in this implentation will basically be adding all the extra checks I have cluttered in there and put in here
             
                
-            enemyAnims.Play(GeneralUse.AnimStates[currentState]);
+            enemyAnims.Play(GeneralUse.animStates[currentState]);
             
         }
         IEnumerator PostAnimActions()

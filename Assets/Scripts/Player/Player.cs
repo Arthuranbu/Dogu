@@ -215,7 +215,7 @@ namespace Dogu
        
         public void PlayAnimation()
         {
-            playerAnims.SetTrigger(Animator.StringToHash(GeneralUse.AnimStates[currentState]));
+            playerAnims.SetTrigger(Animator.StringToHash(GeneralUse.animStates[currentState]));
         }
         void PlayHUDAnimation(GameObject UIElement,string state)
         {
@@ -298,6 +298,7 @@ namespace Dogu
         {
             if (other.CompareTag("Floor"))
                 _onFloor = false;
+            
         }
         #endregion
     }

@@ -28,13 +28,7 @@ namespace Dogu
             }
            
         }
-        /*public struct AnimTriggers
-        {
-            public string attack;
-            public string move;
-            public string die;
-            public string objectToAnimate;
-        }*/
+
         public enum CurrentAnimState
         {
             IDLE,
@@ -45,9 +39,19 @@ namespace Dogu
             DYING,
             SHOOTING
         }
+        //Should I make it flags? enums take less time than strings, but going to have to use strings regardless, so basicall same as below.
+        //So is it better If I just use strings straight up then whatever it randomizes to I save that instead of assigning something completely
+        //diff cause again it's same logic of using magic value that has no real purpose other than to be used as a trigger to pass in another 
+        //value, if it's trigger to do an event then it's fine it has a purpose but it's trigger to assign the real trigger to event.
+        public static string[] enemyTypes =
+        {
+            "Ghost",
+            "Bird",
+            "Boar"
+        };
        //Will play states directly, will save triggers and params like that for more specificity.
         ///0:Idle,1:Move,2:Attack,3:Hit,4:Die,5:Shoot
-        public static Dictionary<CurrentAnimState,string> AnimStates = new Dictionary<CurrentAnimState, string>()
+        public static Dictionary<CurrentAnimState,string> animStates = new Dictionary<CurrentAnimState, string>()
          {
             {CurrentAnimState.IDLE, "Idle" },
             {CurrentAnimState.MOVING, "Move" },

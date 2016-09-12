@@ -31,12 +31,11 @@ namespace Dogu
         bool currentlyChecking;
         EnemySpawner spawnEnemies;
         static GameObject[] enemiesInScene;
-        List<Transform> spawnPoints;
         private int _wave;
         private int nEnemiesToSpawn;
         #endregion
         // Use this for initialization
-
+        //Will change name to starting next round, so more general name, this will be virtual
         IEnumerator StartingNextWave()
         {
             waveInfo.text = string.Format("Wave {0}", Wave);
@@ -60,12 +59,9 @@ namespace Dogu
             mainMenuUI = GameObject.Find("MainMenu");
 
             waveInfo = GameObject.Find("WaveNumber").GetComponent<Text>();
-            spawnPoints = new List<Transform>();
+            
             spawnEnemies = GetComponent<EnemySpawner>();
-            foreach (GameObject point in GameObject.FindGameObjectsWithTag("SpawnPoint"))
-            {
-                spawnPoints.Add(point.transform);
-            }
+           
         }
         void Start()
         {
@@ -97,7 +93,6 @@ namespace Dogu
             
             GameStarted = true;
         }
-        #endregion
         public void RestartGame()
         {
             playerRef.Respawn();
@@ -112,6 +107,8 @@ namespace Dogu
             gameUI.SetActive(false);
             Destroy(playerRef.gameObject);
         }
+        #endregion
+
         void Update()
         {
             //temporary check in Update, just to increase spawns and get waves going for now.
@@ -151,12 +148,16 @@ namespace Dogu
         IEnumerator ChooseSpawnPoints(GameObject[] enemies)
         {
             yield return new WaitForSeconds(2.0f);
+            GameObject[] spawnPoints = new GameObject[6];
             foreach (GameObject enemy in enemies)
             {
+                if (enemy.GetComponent<Ghost>())
+                    spawnPoints = GameObject.FindGameObjectsWithTag("GhostSpawn");
+                
                 //delay so they're not all pile don top of each other.
                 yield return new WaitForSeconds(0.5f);
-                int randSpawnPoint = Random.Range(0, spawnPoints.Count);
-                enemy.transform.position = spawnPoints[randSpawnPoint].position; 
+                int randSpawnPoint = Random.Range(0, spawnPoints.Length);
+                enemy.transform.position = spawnPoints[randSpawnPoint].transform.position; 
                 enemy.GetComponent<Enemy>().Prepped = true;
             }
 
