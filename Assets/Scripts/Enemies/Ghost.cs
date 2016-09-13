@@ -6,6 +6,12 @@ namespace Dogu
     {
 
         // Use this for initialization
+
+        public override void Prepare()
+        {
+            base.Prepare();
+        }
+
         protected override void Update()
         {
             base.Update();

@@ -64,11 +64,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\DoguAnimations.cs" />
+    <Compile Include="Assets\Scripts\Enemies\Boar.cs" />
     <Compile Include="Assets\Scripts\Enemies\Enemy.cs" />
     <Compile Include="Assets\Scripts\Enemies\EnemySpawner.cs" />
     <Compile Include="Assets\Scripts\Enemies\Ghost.cs" />
+    <Compile Include="Assets\Scripts\GameManagers\CameraManager.cs" />
     <Compile Include="Assets\Scripts\GameManagers\GameManager.cs" />
     <Compile Include="Assets\Scripts\GameManagers\GloballyUsedInterfaces.cs" />
+    <Compile Include="Assets\Scripts\GameManagers\LevelInteraction.cs" />
+    <Compile Include="Assets\Scripts\GameManagers\Teleporters.cs" />
     <Compile Include="Assets\Scripts\Player\BaseForAllActiveObjects.cs" />
     <Compile Include="Assets\Scripts\Player\Player.cs" />
   </ItemGroup>

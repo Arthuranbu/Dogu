@@ -23,12 +23,12 @@ namespace Dogu
 
         Transform firePoint;
         SpriteRenderer doguSprite;
-        float gravity = 30.0f;
+        //Should maintain same gravity for all, just amps will vary.
         static GeneralUse.Stats initPlayerStats;
         GameObject blastPrefab;
         GameObject blastInstance;
         //Should be inside the struct, but enemies aren't jumping right now so won't.
-        float jumpHeight = 6.0f;
+        float jumpHeight = 15.0f;
 
         public bool Dead
         {
@@ -76,7 +76,7 @@ namespace Dogu
             
             if (!OnFloor && _doneJumping)
             {
-                transform.Translate(-transform.up * gravity * Time.deltaTime);
+                transform.Translate(-transform.up * (GeneralUse.GRAVITY * 2) * Time.deltaTime);
                 if (transform.position.y == GameObject.Find("FloorStart").transform.position.y)
                     OnFloor = true;
             }
@@ -90,7 +90,7 @@ namespace Dogu
             float jumpVal = Input.GetAxis("Jump");
             float horizontalVal = Input.GetAxis("Horizontal");
 
-
+            currentState = GeneralUse.CurrentAnimState.MOVING;
             transform.Translate(transform.right * horizontalVal * Time.deltaTime * playerStats.speedAmp);
             if (horizontalVal != 0)
             {
@@ -108,7 +108,7 @@ namespace Dogu
                     firePoint.localPosition += new Vector3(3.0f,0,0);
                     doguSprite.flipX = false;
                 }
-                currentState = GeneralUse.CurrentAnimState.MOVING;
+                
             }
             else
                     currentState = GeneralUse.CurrentAnimState.STOPPING;
@@ -128,7 +128,7 @@ namespace Dogu
             //Jump up loop
             do
             {
-                transform.Translate(transform.up * Time.deltaTime * gravity/2);
+                transform.Translate(transform.up * Time.deltaTime * GeneralUse.GRAVITY);
                 yield return new WaitForEndOfFrame();
             }
             while (transform.position.y <= initPos.y + jumpHeight);
@@ -138,7 +138,7 @@ namespace Dogu
                 do
                 {
                     Debug.Log("double jump");
-                    transform.Translate(transform.up * Time.deltaTime * gravity / 2);
+                    transform.Translate(transform.up * Time.deltaTime * GeneralUse.GRAVITY / 2);
                     yield return new WaitForEndOfFrame();
                 } while (transform.position.y <= initPos.y + (jumpHeight * 2));
             }
@@ -230,9 +230,9 @@ namespace Dogu
            
         }
 
-        //This should honestly be in gameManager, I could put a function in there that calls this
-        //But eh, fuck it just call directly.
-        public void Respawn()
+        
+        //Move this to 
+        public void Spawn()
         {
             Dead = false;
             //Have to get these references here, because call when come back from mainmenu, even though new instance, and thus should call start again and get these references, for whatever reason it doesn't soo yeah.
