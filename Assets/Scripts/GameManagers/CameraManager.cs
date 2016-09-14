@@ -40,9 +40,10 @@ namespace Dogu
                 {
 
                     //It's always only doing left.//My dumb ass logic, of course it's other way around holy shit. player is terminal and threshhold is initial.
-                    if ((other.transform.localPosition.x - transform.localPosition.x) > 0)
+                    //Hate having direction just for this but meh,
+                    if (other.GetComponent<Player>().direction > 0)
                         mainSceneCamera.transform.Translate(transform.right * Time.deltaTime * 20);
-                    else if ((other.transform.localPosition.x - transform.localPosition.x) < 0)
+                    else if (other.GetComponent<Player>().direction < 0)
                         mainSceneCamera.transform.Translate(-transform.right * Time.deltaTime * 20);
                 }
             }

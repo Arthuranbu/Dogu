@@ -19,6 +19,8 @@ namespace Dogu
         bool _isDead;
         bool _onFloor;
         bool _doneJumping = true;
+        bool _singleJumping = false;
+        bool _doubleJumping = false;
         #endregion
 
         Transform firePoint;
@@ -28,6 +30,8 @@ namespace Dogu
         GameObject blastPrefab;
         GameObject blastInstance;
         //Should be inside the struct, but enemies aren't jumping right now so won't.
+        //Public soley for camera pan
+        public float direction;
         float jumpHeight = 15.0f;
 
         public bool Dead
@@ -78,25 +82,29 @@ namespace Dogu
             {
                 transform.Translate(-transform.up * (GeneralUse.GRAVITY * 2) * Time.deltaTime);
                 if (transform.position.y == GameObject.Find("FloorStart").transform.position.y)
+                {
                     OnFloor = true;
+                    _doubleJumping = false;
+                    _singleJumping = false;
+                }
             }
                 
         }
         #region Player Actions
         void playerMovement()
         {
-            
+
             //Moving this block to a function later.
-            float jumpVal = Input.GetAxis("Jump");
-            float horizontalVal = Input.GetAxis("Horizontal");
+            bool jumped = Input.GetKeyDown(KeyCode.Space);
+            direction = Input.GetAxis("Horizontal");
 
             currentState = GeneralUse.CurrentAnimState.MOVING;
-            transform.Translate(transform.right * horizontalVal * Time.deltaTime * playerStats.speedAmp);
-            if (horizontalVal != 0)
+            transform.Translate(transform.right * direction * Time.deltaTime * playerStats.speedAmp);
+            if (direction != 0)
             {
                 
-                firePoint.localPosition *= horizontalVal;
-                if (horizontalVal < 0)
+                firePoint.localPosition *= direction;
+                if (direction < 0)
                 {
                     firePoint.eulerAngles = new Vector3(0, 180.0f, 0);
                     firePoint.localPosition -= new Vector3(3.0f, 0, 0);
@@ -112,40 +120,56 @@ namespace Dogu
             }
             else
                     currentState = GeneralUse.CurrentAnimState.STOPPING;
-            if (jumpVal > 0 && _onFloor && _doneJumping)
+            if (jumped)
             {
-                StartCoroutine(Jump());
+                if (_doneJumping && _onFloor)
+                {
+                    _singleJumping = true;
+                    StartCoroutine(Jump());
+                }
+                else if (!_doneJumping)
+
+                    StartCoroutine(Jump());
             }
-            PlayAnimation();
+            
+
             
         }
         IEnumerator Jump()
         {
-            _doneJumping = false;
-            Vector3 initPos = transform.position;
+            OnFloor = false;
+            float jumpAmp = 1.0f;
 
+            if (_doneJumping)
+                _doneJumping = false;
+            else if (!_doneJumping && _singleJumping)
+            {
+                Debug.Log("I'm double jumping! I'm doing it!");
+                _doubleJumping = true;
+                jumpAmp += 5.0f;
+            }
+            Vector3 initPos = transform.position;
 
             //Jump up loop
             do
             {
                 transform.Translate(transform.up * Time.deltaTime * GeneralUse.GRAVITY);
                 yield return new WaitForEndOfFrame();
-            }
-            while (transform.position.y <= initPos.y + jumpHeight);
-            OnFloor = false;
-            if (Input.GetAxis("Jump") > 0 )
-            {
-                do
+                if (_doubleJumping)
                 {
-                    Debug.Log("double jump");
-                    transform.Translate(transform.up * Time.deltaTime * GeneralUse.GRAVITY / 2);
-                    yield return new WaitForEndOfFrame();
-                } while (transform.position.y <= initPos.y + (jumpHeight * 2));
-            }
-              
+                    _doneJumping = false;
+                  
+                }
+            } while (transform.position.y <= initPos.y + (jumpHeight + jumpAmp));
+
+
             //Starts to go down from here, like life.
+
+            
             _doneJumping = true;
         }
+
+        
 
         void Attack()
         {

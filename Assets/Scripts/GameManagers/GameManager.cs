@@ -120,7 +120,7 @@ namespace Dogu
             playerRef.Spawn();
             //Even amount of all or have randon on what will spawnper wave.
             //Could have this be loop then randomize each time rather than loop inside the spawn enemy function itself.
-            StartCoroutine(SetEnemiesToSpawn(5));
+           // StartCoroutine(SetEnemiesToSpawn(5));
             GameStarted = true;
         }
         
