@@ -69,19 +69,40 @@ namespace Dogu
 
         }
 
-        void SetEnemiesToSpawn(int enemyCount)
+        IEnumerator SetEnemiesToSpawn(int enemyCount)
         {
             for (int es = 0; es < enemyCount; ++es)
             {
                 string enemyToSpawn = GeneralUse.enemyTypes[Random.Range(0, GeneralUse.enemyTypes.Length)];
                 GameObject enemySpawned = enemyRef.SpawnEnemy(enemyToSpawn);
+                SetEnemySpawnLocation(enemyToSpawn, enemySpawned);
                 //To find enemy should be to find Boar.
-                enemySpawned.GetComponent<Enemy>().Prepare();
+                //Getting component enemy should work since it has boar.
+                //Just getting enemy should work, BECAUSE THATS HOW INHERITENCE WORKS.
                 enemiesInScene.Add(enemySpawned);
-               
+
+                //AND IT DOES SO WTF.
+            }
+            foreach (GameObject enemy in enemiesInScene)
+            {
+                enemy.GetComponent<Enemy>().Prepare();
+                yield return new WaitForEndOfFrame();
             }
         }
         
+        void SetEnemySpawnLocation(string enemyToSpawn, GameObject enemySpawned)
+        {
+            GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag(enemyToSpawn + "Spawn");
+            enemySpawned.transform.position = spawnPoints[Random.Range(0, spawnPoints.Length)].GetComponent<Transform>().position;
+        }
+       
+        void PrepareEnemies()
+        {
+            foreach (var x in enemiesInScene)
+            {
+                x.GetComponent<Enemy>().Prepare();
+            }
+        }
         #region GameManaging functions called by UI
         public void StartGame()
         {
@@ -99,8 +120,7 @@ namespace Dogu
             playerRef.Spawn();
             //Even amount of all or have randon on what will spawnper wave.
             //Could have this be loop then randomize each time rather than loop inside the spawn enemy function itself.
-            SetEnemiesToSpawn(5);    
-            
+            StartCoroutine(SetEnemiesToSpawn(5));
             GameStarted = true;
         }
         

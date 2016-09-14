@@ -10,6 +10,7 @@ namespace Dogu
         public override void Prepare()
         {
             base.Prepare();
+   
         }
 
         protected override void Update()
@@ -45,7 +46,7 @@ namespace Dogu
         protected override void EnemyMovement()
         {
 
-
+            Debug.Log("Ghost Moving");
             bool inVicinity = CheckDistance();
 
             if (!inVicinity && currentState != GeneralUse.CurrentAnimState.ATTACKING)

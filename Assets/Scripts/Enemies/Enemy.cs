@@ -45,10 +45,6 @@ namespace Dogu
         //Make this a coroutine so not all stacked together incase of spawning in same place, low chance but chance.
         public virtual void Prepare()
         {
-            //This base component will be called last.
-            //Initializing list every time, might be bad durig run time since amount of spawn points and their positions are constant I should hav
-            //these be static arrays/dictionaries(Wait I can't call gameobject.find before compiling can I?
-            transform.position = enemySpawnPoints[Random.Range(0, enemySpawnPoints.Length)].GetComponent<Transform>().position;
             Prepped = true;
         }
 
@@ -75,30 +71,18 @@ namespace Dogu
         // Use this for initialization
         void Start()
         {
-            //There has to be better way to do this without just putting it directly.
-            //makes tags less direct but it works AND ITS MODULAR. Slightly kills readability but fuck it.
-            //If really want to keep readability I could just loop through and delete clone part, or just append all elements minus the clone.
-
-            //Fuck it ddid the loop, more lines over all, but as project expands, this modularity and readability will pay off, and the extra logic checks and iterations won't hurt preforamnce enough to warant not doing this.
-
-            //ToDo: Move this to its own function, called trim/revert name or whatever. So far only need for this, so only keeping in Enemy class, but could be used in future to get rid of clone part of text.
-
-
-            Debug.Log(trimName() + "Spawn");
-            enemySpawnPoints = GameObject.FindGameObjectsWithTag(trimName() + "Spawn");
             player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
             Dead = false;
             Prepped = false;
            
-            //I don't understand why default value doesn't work.
             EnemyStats = new GeneralUse.Stats(5,50);
 
         }
        
         protected virtual void Update()
         {
-            if (Prepped && !Dead && !player.Dead)
+            if (Prepped)
             {
                 EnemyMovement();
                 PlayAnimation();

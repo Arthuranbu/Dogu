@@ -62,7 +62,7 @@ namespace Dogu
         public static string[] enemyTypes =
         {
             "Ghost",
-            "Bird",
+           // "Bird",
             "Boar"
         };
 
