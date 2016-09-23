@@ -60,7 +60,7 @@ namespace Dogu
                 Vector2 targetPos = new Vector2(player.transform.position.x, player.transform.position.y);
 
                 //Stupid but this works if 3d object and moving in 2d, BUT now attacking doesn't work, wtf;
-                transform.position = Vector3.MoveTowards(transform.position, targetPos, Time.deltaTime * EnemyStats.speedAmp);
+                transform.position = Vector3.MoveTowards(transform.position, targetPos, Time.deltaTime * enemyStats.speedAmp);
                 currentState = GeneralUse.CurrentAnimState.MOVING;
                 // enemyAnims.Play(GeneralUse.AnimStates[currentState]);
             }

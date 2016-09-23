@@ -9,6 +9,11 @@ namespace Dogu
     public class GameManager : MonoBehaviour
     {
         //Todo: add levelManager struct or class, but that's polishing wave generation, for now keep simple first.
+        CollectItems collectingGame;
+        HuntEnemy huntingGame;
+        ClearWave waveGame;
+
+        GameUI manageUI;
         bool GameStarted;
         #region Cameras
         CameraManager manageCameras;
@@ -18,17 +23,19 @@ namespace Dogu
         GameObject DoguPrefab;
         Transform playerSpawnPoint;
         #endregion
+        //Need to move all this to a gameUI class.
         #region UI
         GameObject mainMenuUI;
         GameObject gameUI;
         GameObject waveNoticeUI;
-        
+
+        Text progressInfo;
         Text waveInfo;
         GameObject deathScreenUI;
         #endregion
 
         #region Enemy Variables
-        bool currentlyChecking;
+        //bool currentlyChecking;
         EnemySpawner enemyRef;
         List<GameObject> enemiesInScene;
         private int _wave;
@@ -48,24 +55,25 @@ namespace Dogu
 
         void Awake()
         {
+            huntingGame = GetComponent<HuntEnemy>();
+            collectingGame = GetComponent<CollectItems>();
+            waveGame = GetComponent<ClearWave>();
+
+            manageUI = GetComponent<GameUI>();
+
             enemiesInScene = new List<GameObject>();
             DoguPrefab = Resources.Load("Prefabs/Dogu") as GameObject;
             playerSpawnPoint = GameObject.Find("PlayerSpawn").GetComponent<Transform>();
 
-            deathScreenUI = GameObject.Find("DeathScreen");
-            gameUI = GameObject.Find("GameUI");
-            mainMenuUI = GameObject.Find("MainMenu");
             manageCameras = GameObject.Find("LevelThreshhold").GetComponent<CameraManager>();
-
-            waveInfo = GameObject.Find("WaveNumber").GetComponent<Text>();
             
             enemyRef = GetComponent<EnemySpawner>();
            
         }
         void Start()
         {
-          
-            gameUI.SetActive(false);
+
+            manageUI.MainMenuUI();
 
         }
 
@@ -73,15 +81,12 @@ namespace Dogu
         {
             for (int es = 0; es < enemyCount; ++es)
             {
-                string enemyToSpawn = GeneralUse.enemyTypes[Random.Range(0, GeneralUse.enemyTypes.Length)];
+
+                string enemyToSpawn = GeneralUse.allEnemyNames[Random.Range(0, GeneralUse.allEnemyNames.Length)];
                 GameObject enemySpawned = enemyRef.SpawnEnemy(enemyToSpawn);
                 SetEnemySpawnLocation(enemyToSpawn, enemySpawned);
-                //To find enemy should be to find Boar.
-                //Getting component enemy should work since it has boar.
-                //Just getting enemy should work, BECAUSE THATS HOW INHERITENCE WORKS.
                 enemiesInScene.Add(enemySpawned);
 
-                //AND IT DOES SO WTF.
             }
             foreach (GameObject enemy in enemiesInScene)
             {
@@ -104,12 +109,23 @@ namespace Dogu
             }
         }
         #region GameManaging functions called by UI
-        public void StartGame()
+        public void StartGame(string gameType)
         {
+            switch (gameType)
+            {
+                case "HuntEnemy":
+                    huntingGame.prepareGame();
+                    break;
+                case "ClearWave":
+                    waveGame.prepareGame();
+                    break;
+                case "CollectItems":
+                    huntingGame.prepareGame();
+                    break;
+            }
             //Setting up UI
-            mainMenuUI.SetActive(false);
-            gameUI.SetActive(true);
-            deathScreenUI.SetActive(false);
+            manageUI.StartGameUI();
+     
 
             manageCameras.switchCameras();
 
@@ -134,8 +150,7 @@ namespace Dogu
 
         public void BackToMainMenu()
         {
-            mainMenuUI.SetActive(true);
-            gameUI.SetActive(false);
+            manageUI.MainMenuUI();
             Destroy(playerRef.gameObject);
         }
         #endregion
@@ -145,10 +160,9 @@ namespace Dogu
             //temporary check in Update, just to increase spawns and get waves going for now.
             if (GameStarted)
             {
-                if (!currentlyChecking)
-                    StartCoroutine(CheckDead());
+                StartCoroutine(CheckDead());
 
-           }
+            }
         }
         
        
@@ -157,12 +171,12 @@ namespace Dogu
         {
             //Probably bad thread practice getting rid of this, haven't looked too much into threads past what I learned in c++
             //but getting rid of it in this case gets rid of delay with death UI, so it's beneficial. 
-            currentlyChecking = true;
+         //   currentlyChecking = true;
 
             if (playerRef.Dead)
             {
 
-                deathScreenUI.SetActive(true);
+                manageUI.EndGameUI();
                 //Wait until player respawns
                 yield return new WaitUntil(() => !playerRef.Dead);
 
@@ -173,13 +187,8 @@ namespace Dogu
                 }
                 
             }
-            else if (!playerRef.Dead)
-            {
-                if (deathScreenUI.activeInHierarchy)
-                    deathScreenUI.SetActive(false);
-              
-            }
-           currentlyChecking = false;
+
+           //currentlyChecking = false;
         }
      
 

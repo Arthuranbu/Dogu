@@ -17,7 +17,10 @@ namespace Dogu
         protected bool doingPostAction;
 
         protected GameObject[] enemySpawnPoints;
-        protected GeneralUse.Stats EnemyStats;
+        protected GeneralUse.Stats enemyStats;
+        //Only one need right now.
+        protected float baseSpeed;
+        
         protected Animator enemyAnims;
 
         #region Enemy States
@@ -76,7 +79,6 @@ namespace Dogu
             Dead = false;
             Prepped = false;
            
-            EnemyStats = new GeneralUse.Stats(5,50);
 
         }
        

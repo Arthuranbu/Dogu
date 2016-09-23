@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 //Change name of this script
-namespace Dogu
+namespace Dogu 
 {
     //Interface that all classes will implement
     //Doing this because though alot of it will be basic just do animation, different implentations will add seperate things.
@@ -33,10 +33,10 @@ namespace Dogu
         public struct Stats
         {
             public int hp;
-            public int speedAmp;
+            public float speedAmp;
             public int dmg;
             //Default should take over if I don't pass anything in.
-            public Stats(int uHP, int uSpeedAmp = 2, int uDmg = 2)
+            public Stats(int uHP, float uSpeedAmp = 2, int uDmg = 2)
             {
                 hp = uHP;
                 speedAmp = uSpeedAmp;
@@ -59,11 +59,15 @@ namespace Dogu
         //So is it better If I just use strings straight up then whatever it randomizes to I save that instead of assigning something completely
         //diff cause again it's same logic of using magic value that has no real purpose other than to be used as a trigger to pass in another 
         //value, if it's trigger to do an event then it's fine it has a purpose but it's trigger to assign the real trigger to event.
-        public static string[] enemyTypes =
+        public static Enemy[] allEnemies = new Enemy[2]
         {
-            "Ghost",
-           // "Bird",
-            "Boar"
+           new Boar(),
+           new Ghost()
+        };
+        public static string[] allEnemyNames = new string[2]
+        {
+            "Boar",
+            "Ghost"
         };
 
         //sTATES ALREADY IN ANIM STATES WILL RENAME LATER

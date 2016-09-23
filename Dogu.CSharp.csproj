@@ -63,18 +63,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\DoguAnimations.cs" />
     <Compile Include="Assets\Scripts\Enemies\Boar.cs" />
     <Compile Include="Assets\Scripts\Enemies\Enemy.cs" />
     <Compile Include="Assets\Scripts\Enemies\EnemySpawner.cs" />
     <Compile Include="Assets\Scripts\Enemies\Ghost.cs" />
     <Compile Include="Assets\Scripts\GameManagers\CameraManager.cs" />
+    <Compile Include="Assets\Scripts\GameManagers\ClearWave.cs" />
+    <Compile Include="Assets\Scripts\GameManagers\CollectItems.cs" />
     <Compile Include="Assets\Scripts\GameManagers\GameManager.cs" />
+    <Compile Include="Assets\Scripts\GameManagers\GameTypeInterface.cs" />
     <Compile Include="Assets\Scripts\GameManagers\GloballyUsedInterfaces.cs" />
+    <Compile Include="Assets\Scripts\GameManagers\HuntEnemy.cs" />
     <Compile Include="Assets\Scripts\GameManagers\LevelInteraction.cs" />
     <Compile Include="Assets\Scripts\GameManagers\Teleporters.cs" />
     <Compile Include="Assets\Scripts\Player\BaseForAllActiveObjects.cs" />
     <Compile Include="Assets\Scripts\Player\Player.cs" />
+    <Compile Include="Assets\Scripts\UI\GameUI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>
