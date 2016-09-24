@@ -10,8 +10,11 @@ namespace Dogu
     public abstract class Enemy : MonoBehaviour, Animations
     {
         //Might need to add delay a bit
-        //I should have a handler class that handles this, but will write that later, that's more of a polish.
+        //  I should have a handler class that handles this, but will write that later, that's more of a polish.
         protected Player player;
+        protected IGameType updateProgress;
+        protected GameUI updateProgressUI;
+
 
         private bool stillInRange;
         protected bool doingPostAction;
@@ -36,7 +39,6 @@ namespace Dogu
                 {
                     for (int j = 0; j < i; j++)
                     {
-                        Debug.Log(this.name[j]);
                         objectName += this.name[j];
                     }
                     break;
@@ -69,6 +71,8 @@ namespace Dogu
         void Awake()
         {
             enemyAnims = GetComponentInChildren<Animator>();
+            updateProgress = GameObject.Find("GameManager").GetComponent<IGameType>();
+            updateProgressUI = GameObject.Find("GameManager").GetComponent<GameUI>();
         }
 
         // Use this for initialization
@@ -187,6 +191,7 @@ namespace Dogu
                     {
                         if (prevState == GeneralUse.CurrentAnimState.ATTACKING)
                             yield return new WaitForSeconds(enemyAnims.speed);
+                        //if (this == updateProgress.GoalTarget)
                         Destroy(gameObject);
                     }
                         break;

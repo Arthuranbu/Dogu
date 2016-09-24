@@ -6,6 +6,7 @@ namespace Dogu
     {
         //Design needs to be taken accounted for for how difficulty ramps up. For now just get one round going
         public Enemy GoalTarget {  set; get; }
+        public string targetName { set; get; }
         public int GoalAmount {  set; get; }
         public void increaseDifficulty()
         {

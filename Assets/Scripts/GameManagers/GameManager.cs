@@ -51,6 +51,11 @@ namespace Dogu
 
             waveInfo.transform.parent.gameObject.SetActive(false);
         }
+        public IGameType currentGameType
+        {
+            set;
+            get;
+        }
 
 
         void Awake()
@@ -113,18 +118,23 @@ namespace Dogu
         {
             switch (gameType)
             {
-                case "HuntEnemy":
-                    huntingGame.prepareGame();
+                case "Hunt":
+                    currentGameType = huntingGame;
                     break;
-                case "ClearWave":
-                    waveGame.prepareGame();
+                case "Clear":
+                    currentGameType = waveGame;
+                    
                     break;
-                case "CollectItems":
-                    huntingGame.prepareGame();
+                case "Collect":
+                    currentGameType = collectingGame;
                     break;
             }
+            currentGameType.prepareGame();
             //Setting up UI
+            manageUI.goalProgress = currentGameType.GoalAmount;
             manageUI.StartGameUI();
+         
+
      
 
             manageCameras.switchCameras();
@@ -187,8 +197,6 @@ namespace Dogu
                 }
                 
             }
-
-           //currentlyChecking = false;
         }
      
 

@@ -9,9 +9,10 @@ namespace Dogu
         void prepareGame();
         void increaseDifficulty();
         int GoalAmount { set; get; }
-        Enemy GoalTarget { set; get; } 
+        Enemy GoalTarget { set; get; }
+        string targetName { set; get; }
        //void nextRound();//This and increase difficulty could be same, but maybe keep seperate next round will be front end side decided by gamemanger
-        //increase difficulty will be back end.
-    
+       //increase difficulty will be back end.
+
     }
 }

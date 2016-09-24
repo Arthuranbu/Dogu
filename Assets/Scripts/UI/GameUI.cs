@@ -47,4 +47,14 @@ public class GameUI : MonoBehaviour {
         gameUI.SetActive(false);
         deathScreenUI.SetActive(false);
     }
+    
+    public int currentProgress { set; get; }
+
+    public int goalProgress { set; get; }
+
+    private void updateProgressInfo()
+    {
+        string progressText = string.Format("{0}/{1}", currentProgress, goalProgress);
+        progressInfo.text = progressText;
+    }
 }
