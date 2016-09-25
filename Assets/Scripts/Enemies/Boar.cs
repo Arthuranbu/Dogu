@@ -22,16 +22,16 @@ namespace Dogu
 
         void Start()
         {
-            discreteSpeedIncrement = 0;
+            discreteSpeedIncrement = 1;
             baseSpeed = 10.0f;
         }
 
-        public override void Prepare()
+        public override void PrepareEnemy()
         {
             //Static doesn't work same way as c++ in terms of inside functions interesting.
            
             //Unless I add more, with how I made it modular, won't need to actually override it.
-            base.Prepare();
+            base.PrepareEnemy();
             //Will just do stats here, since those will actually change with each wave to increase difficulty.
            
             //Post increment so that it increases for next time on same line but increments it by current value.
@@ -46,14 +46,30 @@ namespace Dogu
 
         protected override void EnemyMovement()
         {
+            base.EnemyMovement();
             //This won't chase player but will do specific pattern honestly could prob just make it walk left, then when not on floor then quit movement/change to drop down, now that's 2 classes using onfloor bool, is it worth making it into namespace?
-            Debug.Log("Boar Moving");
+            float direction = (CheckDistance() > 0) ? 1.0f : -1.0f;
             if (!_onFloor)
             {
                 transform.Translate(-transform.up * Time.deltaTime * GeneralUse.GRAVITY);
             }
             else
-                transform.Translate(-transform.right * Time.deltaTime * enemyStats.speedAmp);
+                transform.Translate(transform.right * direction * Time.deltaTime * enemyStats.speedAmp);
+        }
+
+        protected override void OnTriggerEnter(Collider other)
+        {
+            base.OnTriggerEnter(other);
+            if (other.CompareTag("Floor"))
+                _onFloor = true;
+
+        }
+
+        protected override void OnTriggerExit(Collider other)
+        {
+            base.OnTriggerExit(other);
+            if (other.CompareTag("Floor"))
+                _onFloor = false;
         }
     }
 }

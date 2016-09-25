@@ -95,7 +95,7 @@ namespace Dogu
             }
             foreach (GameObject enemy in enemiesInScene)
             {
-                enemy.GetComponent<Enemy>().Prepare();
+                enemy.GetComponent<Enemy>().PrepareEnemy();
                 yield return new WaitForEndOfFrame();
             }
         }
@@ -110,7 +110,7 @@ namespace Dogu
         {
             foreach (var x in enemiesInScene)
             {
-                x.GetComponent<Enemy>().Prepare();
+                x.GetComponent<Enemy>().PrepareEnemy();
             }
         }
         #region GameManaging functions called by UI
@@ -146,7 +146,7 @@ namespace Dogu
             playerRef.Spawn();
             //Even amount of all or have randon on what will spawnper wave.
             //Could have this be loop then randomize each time rather than loop inside the spawn enemy function itself.
-           // StartCoroutine(SetEnemiesToSpawn(5));
+            StartCoroutine(SetEnemiesToSpawn(5));
             GameStarted = true;
         }
         

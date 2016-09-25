@@ -3,14 +3,37 @@ using System.Collections;
 
 namespace Dogu
 {
-    public interface IGameType
+    //Might turn to abstract class, but updateUI only thing that needs to be by default implemented
+    public abstract class IGameType:MonoBehaviour
     {
+        private short _goalAmount;
         //Startgame function in GameManager will call the prepareGame function in the concret gameTypes
-        void prepareGame();
-        void increaseDifficulty();
-        int GoalAmount { set; get; }
-        Enemy GoalTarget { set; get; }
-        string targetName { set; get; }
+        private GameUI updateUI { set; get; }
+        public virtual void prepareGame()
+        {
+            updateUI.goalProgress = GoalAmount;
+        }
+        public abstract void increaseDifficulty();
+        public short GoalAmount
+        {
+            set
+            {
+                _goalAmount = value;
+                updateProgressOnUI();
+            }
+            get { return _goalAmount; }
+        }
+        public Enemy GoalTarget { set; get; }
+        protected string targetName { set; get; }
+        protected void updateProgressOnUI()
+        {
+            updateUI.currentProgress = GoalAmount;
+        }
+        void Awake()
+        {
+            updateUI = GetComponent<GameUI>();
+
+        }
        //void nextRound();//This and increase difficulty could be same, but maybe keep seperate next round will be front end side decided by gamemanger
        //increase difficulty will be back end.
 

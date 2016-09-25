@@ -7,13 +7,12 @@ namespace Dogu
     /// Base won't have attack interval and will only attack if player in vicinity for attacking.
     /// Spearmen will have attack interval.
     /// </summary>
-    public abstract class Enemy : MonoBehaviour, Animations
+    public class Enemy : MonoBehaviour, Animations
     {
         //Might need to add delay a bit
         //  I should have a handler class that handles this, but will write that later, that's more of a polish.
         protected Player player;
         protected IGameType updateProgress;
-        protected GameUI updateProgressUI;
 
 
         private bool stillInRange;
@@ -27,6 +26,8 @@ namespace Dogu
         protected Animator enemyAnims;
 
         #region Enemy States
+
+
         public bool Prepped
         { get; set; }
 
@@ -48,9 +49,11 @@ namespace Dogu
 
         }
         //Make this a coroutine so not all stacked together incase of spawning in same place, low chance but chance.
-        public virtual void Prepare()
+        public virtual void PrepareEnemy()
         {
+            player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
             Prepped = true;
+            enemyAnims = GetComponentInChildren<Animator>();
         }
 
         public bool Dead
@@ -59,7 +62,6 @@ namespace Dogu
         public void Die()
         {
             currentState = GeneralUse.CurrentAnimState.DYING;
-            PlayAnimation();
             if (!doingPostAction)
                 StartCoroutine(PostAnimActions());
             
@@ -70,15 +72,14 @@ namespace Dogu
 
         void Awake()
         {
-            enemyAnims = GetComponentInChildren<Animator>();
+            
             updateProgress = GameObject.Find("GameManager").GetComponent<IGameType>();
-            updateProgressUI = GameObject.Find("GameManager").GetComponent<GameUI>();
         }
 
         // Use this for initialization
         void Start()
         {
-            player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+           
 
             Dead = false;
             Prepped = false;
@@ -91,20 +92,44 @@ namespace Dogu
             if (Prepped)
             {
                 EnemyMovement();
-                PlayAnimation();
+                GeneralUse.playAnim(enemyAnims,GeneralUse.animStates[currentState]);
             }
         }
 
+
         #region Enemy Movement
+        protected float CheckDistance()
+        {
+          
+            float dis = player.transform.position.x - transform.position.x;
+
+
+            //Checks if distance is same as distance between player and its hitbox.
+          
+                if (dis < 0)
+                {
+                    GetComponentInChildren<SpriteRenderer>().flipX = false;
+                }
+                else
+                {
+                    GetComponentInChildren<SpriteRenderer>().flipX = true;
+                }
+            
+
+            return dis;
+        }
         //This will vary from enemy to enemy so will be abstract.
-        protected abstract void EnemyMovement();
+        protected virtual void EnemyMovement()
+        {
+            currentState = GeneralUse.CurrentAnimState.MOVING;
+        }
         
         //this is active for all, scratch that, only ghosts will chase player so only applies to them
         
         #endregion
 
         #region On Collision Events
-        protected void OnTriggerEnter(Collider other)
+        protected virtual void OnTriggerEnter(Collider other)
         {
             if (other.CompareTag("Player") && !Dead && player.OnFloor)
             {
@@ -155,14 +180,7 @@ namespace Dogu
             set;
             get;//Going to add more to this too 
         }
-        public void PlayAnimation()
-        {
-            //Difference in this implentation will basically be adding all the extra checks I have cluttered in there and put in here
-            
-               
-            enemyAnims.Play(GeneralUse.animStates[currentState]);
-            
-        }
+   
         IEnumerator PostAnimActions()
         {
             //Speed is equal to whatever current state is. Would have get stateinfo if 
@@ -180,18 +198,24 @@ namespace Dogu
             {
                 case GeneralUse.CurrentAnimState.ATTACKING:
                     {
-                      
+
                         if (stillInRange)
                         {
                             player.DecreasePlayerHP();
                         }
+                        else
+                            currentState = GeneralUse.CurrentAnimState.MOVING;
                     }
                     break;
                 case GeneralUse.CurrentAnimState.DYING:
                     {
                         if (prevState == GeneralUse.CurrentAnimState.ATTACKING)
                             yield return new WaitForSeconds(enemyAnims.speed);
-                        //if (this == updateProgress.GoalTarget)
+                        if (this == updateProgress.GoalTarget)
+                        {
+                            updateProgress.GoalAmount--;
+                            
+                        }
                         Destroy(gameObject);
                     }
                         break;

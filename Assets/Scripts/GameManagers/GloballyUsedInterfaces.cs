@@ -7,7 +7,7 @@ namespace Dogu
     //Doing this because though alot of it will be basic just do animation, different implentations will add seperate things.
     public interface Animations
     {
-        void PlayAnimation();
+       
         GeneralUse.CurrentAnimState currentState { get; set; }
         
     }
@@ -89,5 +89,9 @@ namespace Dogu
             {CurrentAnimState.DYING, "Die"},
             {CurrentAnimState.SHOOTING, "Shoot" }
          };
+        public static void playAnim(Animator animator, string stateToPlay)
+        {
+            animator.SetTrigger(Animator.StringToHash(stateToPlay));
+        }
     }
 }

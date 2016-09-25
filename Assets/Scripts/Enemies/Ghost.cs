@@ -7,9 +7,10 @@ namespace Dogu
 
         // Use this for initialization
 
-        public override void Prepare()
+        public override void PrepareEnemy()
         {
-            base.Prepare();
+            base.PrepareEnemy();
+            enemyStats.speedAmp = 10.0f;
    
         }
 
@@ -17,37 +18,13 @@ namespace Dogu
         {
             base.Update();
         }
-        bool CheckDistance()
-        {
-            bool inVicinity;
-            float vicinity = player.GetComponent<CapsuleCollider>().radius;
-            float dis = player.transform.position.x - transform.position.x;
-
-
-            //Checks if distance is same as distance between player and its hitbox.
-            if (dis != vicinity)
-            {
-                inVicinity = false;
-                if (dis < 0)
-                {
-                    GetComponentInChildren<SpriteRenderer>().flipX = false;
-                }
-                else
-                {
-                    GetComponentInChildren<SpriteRenderer>().flipX = true;
-                }
-
-            }
-            else
-                inVicinity = true;
-
-            return inVicinity;
-        }
+        
         protected override void EnemyMovement()
         {
+            base.Update();
 
-            Debug.Log("Ghost Moving");
-            bool inVicinity = CheckDistance();
+            float getDistance = CheckDistance();
+            bool inVicinity = (getDistance == player.GetComponent<CapsuleCollider>().radius) ? true : false;
 
             if (!inVicinity && currentState != GeneralUse.CurrentAnimState.ATTACKING)
             {
@@ -59,10 +36,8 @@ namespace Dogu
                 Vector2 myPos = new Vector2(transform.position.x, transform.position.y);
                 Vector2 targetPos = new Vector2(player.transform.position.x, player.transform.position.y);
 
-                //Stupid but this works if 3d object and moving in 2d, BUT now attacking doesn't work, wtf;
                 transform.position = Vector3.MoveTowards(transform.position, targetPos, Time.deltaTime * enemyStats.speedAmp);
-                currentState = GeneralUse.CurrentAnimState.MOVING;
-                // enemyAnims.Play(GeneralUse.AnimStates[currentState]);
+        
             }
         }
     }

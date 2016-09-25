@@ -3,21 +3,15 @@ using System.Collections;
 
 namespace Dogu
 {
-    public class ClearWave : MonoBehaviour, IGameType
+    public class ClearWave : IGameType
     {
-
-       
-        
-        //This kind of useless since waves, target is all enemies so ust pass in enemy instance of objects rather than scripts
-        public Enemy GoalTarget { set; get; } 
-        public string targetName { set; get; }
-        //in this case it will be amount per wave.
-        public int GoalAmount { set; get; }
-        public void increaseDifficulty()
+        public override void increaseDifficulty()
         { }
         
-        public void prepareGame()
+        public override void prepareGame()
         {
+            GoalAmount = 5;
+          
         }
         void Start()
         {

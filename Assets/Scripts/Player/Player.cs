@@ -70,6 +70,7 @@ namespace Dogu
         // Update is called once per frame
         void Update()
         {
+            GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
             if (Input.GetAxis("Attack") > 0)
                 Attack();
             if (Input.GetAxis("RangedAtk") > 0 && !_isShooting)
@@ -174,14 +175,13 @@ namespace Dogu
         void Attack()
         {
             currentState = GeneralUse.CurrentAnimState.ATTACKING;
-            PlayAnimation();
+            
         }
         IEnumerator rangedAttack()
         {
             _isShooting = true;
             currentState = GeneralUse.CurrentAnimState.SHOOTING;
             
-            PlayAnimation();
 
             if (blastInstance == null)
                 blastInstance = Instantiate(blastPrefab);
@@ -237,10 +237,7 @@ namespace Dogu
         }
 
        
-        public void PlayAnimation()
-        {
-            playerAnims.SetTrigger(Animator.StringToHash(GeneralUse.animStates[currentState]));
-        }
+       
         void PlayHUDAnimation(GameObject UIElement,string state)
         {
             UIElement.GetComponent<Animator>().Play(state);
@@ -250,7 +247,6 @@ namespace Dogu
         {
             Dead = true;
             currentState = GeneralUse.CurrentAnimState.DYING;
-            PlayAnimation();
            
         }
 

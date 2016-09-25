@@ -11,7 +11,9 @@ public class GameUI : MonoBehaviour {
 
     Text progressInfo;
     Text waveInfo;
- 
+
+    private short _currentProgress;
+
     // Use this for initialization
     void Awake()
     {
@@ -22,24 +24,17 @@ public class GameUI : MonoBehaviour {
         waveInfo = GameObject.Find("WaveNumber").GetComponent<Text>();
         progressInfo = GameObject.Find("ProgressInfo").GetComponent<Text>();
     }
-    void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+
     public void StartGameUI()
     {
         mainMenuUI.SetActive(false);
         gameUI.SetActive(true);
+        updateProgressInfo();
         deathScreenUI.SetActive(false);
     }
     public void EndGameUI()
     {
         deathScreenUI.SetActive(true);
-
     }
     public void MainMenuUI()
     {
@@ -48,9 +43,16 @@ public class GameUI : MonoBehaviour {
         deathScreenUI.SetActive(false);
     }
     
-    public int currentProgress { set; get; }
+    public short currentProgress {
+        set
+        {
+            _currentProgress = value;
+            updateProgressInfo();
+        }
+        get { return _currentProgress; }
+    }
 
-    public int goalProgress { set; get; }
+    public short goalProgress { set; get; }
 
     private void updateProgressInfo()
     {
