@@ -15,14 +15,24 @@ namespace Dogu
         IEnumerator currentHeart;
         #endregion
         #region Player States
+        bool _isShooting;
         bool _isDead;
         bool _onFloor;
         bool _doneJumping = true;
+        bool _singleJumping = false;
+        bool _doubleJumping = false;
         #endregion
-        float gravity = 20.0f;
+
+        Transform firePoint;
+        SpriteRenderer doguSprite;
+        //Should maintain same gravity for all, just amps will vary.
         static GeneralUse.Stats initPlayerStats;
+        GameObject blastPrefab;
+        GameObject blastInstance;
         //Should be inside the struct, but enemies aren't jumping right now so won't.
-        float jumpHeight = 6.0f;
+        //Public soley for camera pan
+        public float direction;
+        float jumpHeight = 15.0f;
 
         public bool Dead
         {
@@ -39,6 +49,10 @@ namespace Dogu
         
         void Start()
         {
+            doguSprite = GameObject.Find("DoguSprite").GetComponent<SpriteRenderer>();
+            firePoint = GameObject.Find("FirePoint").GetComponent<Transform>();
+            blastPrefab = Resources.Load("Prefabs/DoguRangedAttack") as GameObject;
+            
             healthMeters = new GameObject[5];
             healthMeters = GameObject.FindGameObjectsWithTag("PlayerHealth");
             playerAnims = GetComponentInChildren<Animator>();
@@ -56,78 +70,155 @@ namespace Dogu
         // Update is called once per frame
         void Update()
         {
+            GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
             if (Input.GetAxis("Attack") > 0)
                 Attack();
+            if (Input.GetAxis("RangedAtk") > 0 && !_isShooting)
+                StartCoroutine(rangedAttack());
             if (!_isDead)
                 playerMovement();
             //for debugging.
-            if (Input.GetKeyDown(KeyCode.R))
-                Respawn();
+            
             if (!OnFloor && _doneJumping)
             {
-                transform.Translate(-transform.up * gravity * Time.deltaTime);
+                transform.Translate(-transform.up * (GeneralUse.GRAVITY * 2) * Time.deltaTime);
                 if (transform.position.y == GameObject.Find("FloorStart").transform.position.y)
+                {
                     OnFloor = true;
+                    _doubleJumping = false;
+                    _singleJumping = false;
+                }
             }
                 
         }
         #region Player Actions
         void playerMovement()
         {
-            
+
             //Moving this block to a function later.
-           /* float jumpVal = Input.GetAxis("Jump");
-            float horizontalVal = Input.GetAxis("Horizontal");
+            bool jumped = Input.GetKeyDown(KeyCode.Space);
+            direction = Input.GetAxis("Horizontal");
 
-
-            transform.Translate(transform.right * horizontalVal * Time.deltaTime * playerStats.speedAmp);
-            if (horizontalVal != 0)
+            currentState = GeneralUse.CurrentAnimState.MOVING;
+            transform.Translate(transform.right * direction * Time.deltaTime * playerStats.speedAmp);
+            if (direction != 0)
             {
-                if (horizontalVal < 0)
+                
+                firePoint.localPosition *= direction;
+                if (direction < 0)
                 {
-                    GetComponentInChildren<SpriteRenderer>().flipX = true;
+                    firePoint.eulerAngles = new Vector3(0, 180.0f, 0);
+                    firePoint.localPosition -= new Vector3(3.0f, 0, 0);
+                    doguSprite.flipX = true;
                 }
                 else
-                    GetComponentInChildren<SpriteRenderer>().flipX = false;
-                currentState = GeneralUse.CurrentAnimState.MOVING;
-                PlayAnimation();
+                {
+                    firePoint.eulerAngles = Vector3.zero;
+                    firePoint.localPosition += new Vector3(3.0f,0,0);
+                    doguSprite.flipX = false;
+                }
+                
             }
-            if (jumpVal > 0 && _onFloor)
+            else
+                    currentState = GeneralUse.CurrentAnimState.STOPPING;
+            if (jumped)
             {
-                currentState = GeneralUse.CurrentAnimState.IDLE;
-                PlayAnimation();
-                StartCoroutine(Jump());
+                if (_doneJumping && _onFloor)
+                {
+                    _singleJumping = true;
+                    StartCoroutine(Jump());
+                }
+                else if (!_doneJumping)
+
+                    StartCoroutine(Jump());
             }
-            */
+            
+
+            
         }
         IEnumerator Jump()
         {
-            _doneJumping = false;
-            Vector3 initPos = transform.position;
- 
-            yield return new WaitUntil( () =>
-            {
-                //Jump up loop
-                do
-                    transform.Translate(transform.up * Time.deltaTime * jumpHeight);
-                while (transform.position.y <= initPos.y + jumpHeight);
-                return true;
-            });
+            OnFloor = false;
+            float jumpAmp = 1.0f;
 
-            //This extra delay is for a small float period.
-            yield return new WaitForSeconds(0.13f);
- 
+            if (_doneJumping)
+                _doneJumping = false;
+            else if (!_doneJumping && _singleJumping)
+            {
+                Debug.Log("I'm double jumping! I'm doing it!");
+                _doubleJumping = true;
+                jumpAmp += 5.0f;
+            }
+            Vector3 initPos = transform.position;
+
+            //Jump up loop
+            do
+            {
+                transform.Translate(transform.up * Time.deltaTime * GeneralUse.GRAVITY);
+                yield return new WaitForEndOfFrame();
+                if (_doubleJumping)
+                {
+                    _doneJumping = false;
+                  
+                }
+            } while (transform.position.y <= initPos.y + (jumpHeight + jumpAmp));
+
+
             //Starts to go down from here, like life.
+
+            
             _doneJumping = true;
-            _onFloor = false;
         }
+
+        
 
         void Attack()
         {
             currentState = GeneralUse.CurrentAnimState.ATTACKING;
-            PlayAnimation();
+            
         }
+        IEnumerator rangedAttack()
+        {
+            _isShooting = true;
+            currentState = GeneralUse.CurrentAnimState.SHOOTING;
+            
 
+            if (blastInstance == null)
+                blastInstance = Instantiate(blastPrefab);
+         
+
+            //Changed so doesn't control it, seems pointless in small area now, but if need to keep jst move inside 
+            //do block.
+
+            float directionShot;
+            if (doguSprite.flipX)
+            {
+                directionShot = 1.0f;
+                blastInstance.GetComponent<SpriteRenderer>().flipX = false;
+            }
+            else
+            {
+                directionShot = -1.0f;
+                blastInstance.GetComponent<SpriteRenderer>().flipX = true;
+            }
+            yield return new WaitForSeconds(playerAnims.speed);
+            
+
+            blastInstance.transform.position = firePoint.position;
+            blastInstance.transform.rotation = firePoint.rotation;
+            blastInstance.SetActive(true);
+            float blastLife = 0;
+            //either use blastlife as or statement to kill blast over time, OR since going to have levelInteractions script, could just let death area handle it.
+            do
+            {
+               blastInstance.transform.Translate(transform.right * directionShot * Time.deltaTime * 20);
+                yield return new WaitForEndOfFrame();
+
+            } while (blastInstance.activeInHierarchy);
+            
+            //Destroy(tempInstance);
+            _isShooting = false;
+        }
         #endregion
 
         #region AnimationMethods
@@ -146,10 +237,7 @@ namespace Dogu
         }
 
        
-        public void PlayAnimation()
-        {
-            playerAnims.Play(GeneralUse.AnimStates[currentState]);
-        }
+       
         void PlayHUDAnimation(GameObject UIElement,string state)
         {
             UIElement.GetComponent<Animator>().Play(state);
@@ -159,14 +247,12 @@ namespace Dogu
         {
             Dead = true;
             currentState = GeneralUse.CurrentAnimState.DYING;
-            PlayAnimation();
-            //Won't set him inactive, just leave on ground then UI or some shit pops up to give them option to respawn, functionalty for respawn done, just gotta make it available to players.
-            //Play death animation, set dead= true;
+           
         }
 
-        //This should honestly be in gameManager, I could put a function in there that calls this
-        //But eh, fuck it just call directly.
-        public void Respawn()
+        
+        //Move this to 
+        public void Spawn()
         {
             Dead = false;
             //Have to get these references here, because call when come back from mainmenu, even though new instance, and thus should call start again and get these references, for whatever reason it doesn't soo yeah.
@@ -232,6 +318,7 @@ namespace Dogu
         {
             if (other.CompareTag("Floor"))
                 _onFloor = false;
+            
         }
         #endregion
     }
