@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/Scenes/Box Colliders for platforms & Dogu anims.unity
+  isLoaded: 1
+  isActive: 1
