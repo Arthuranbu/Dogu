@@ -15,7 +15,7 @@ namespace Dogu
         protected IGameType updateProgress;
 
         //Okay so no Enemy ref in game manager so not circularly dependant, so even in rush did atleast that right.
-        protected GameManager checkGameType;
+        protected GameManager gameManager;
 
         private bool stillInRange;
         protected bool doingPostAction;
@@ -29,6 +29,7 @@ namespace Dogu
 
         #region Enemy States
 
+        protected GameObject itemToDrop;
 
         public bool Prepped
         { get; set; }
@@ -64,13 +65,14 @@ namespace Dogu
         public void Die()
         {
             currentState = GeneralUse.CurrentAnimState.DYING;
-            if (checkGameType.currentGameType == CollectItems)
+            if (gameManager.currentGameType is CollectItems)
             {
-                checkGameType.currentGameType.dropItem(this);
+                gameManager.currentGameType.dropItem(this.gameObject);
             }
-            if (checkGameType.currentGameType.GoalTarget == GetComponent<Enemy>())
+
+            if (gameManager.currentGameType.GoalTarget == GetComponent<Enemy>())
             {
-                checkGameType.currentGameType.GoalAmount--;
+                gameManager.currentGameType.GoalAmount--;
             }
             if (!doingPostAction)
                 StartCoroutine(PostAnimActions());
@@ -224,6 +226,8 @@ namespace Dogu
                         if (this == updateProgress.GoalTarget)
                         {
                             updateProgress.GoalAmount--;
+                            if (gameManager.currentGameType == new CollectItems())
+                                dropItem();
                             
                         }
                         Destroy(gameObject);
@@ -239,5 +243,14 @@ namespace Dogu
        
            
         #endregion
+        void dropItem()
+        {
+           
+            string itemToDrop = GeneralUse.droppedItems[this];
+            GameObject droppedItem = Instantiate(Resources.Load<GameObject>("Prefabs/Items/" + itemToDrop));
+            //Spawns the instantiated dropped item to where the enemy just killed was.
+            droppedItem.transform.position = transform.position;
+        }
+
     }
 }

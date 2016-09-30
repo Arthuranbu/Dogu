@@ -76,6 +76,7 @@
     <Compile Include="Assets\Scripts\GameManagers\HuntEnemy.cs" />
     <Compile Include="Assets\Scripts\GameManagers\LevelInteraction.cs" />
     <Compile Include="Assets\Scripts\GameManagers\Teleporters.cs" />
+    <Compile Include="Assets\Scripts\Items.cs" />
     <Compile Include="Assets\Scripts\Player\BaseForAllActiveObjects.cs" />
     <Compile Include="Assets\Scripts\Player\Player.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerAttack.cs" />

@@ -14,6 +14,10 @@ namespace Dogu
             updateUI.goalProgress = GoalAmount;
         }
         public abstract void increaseDifficulty();
+        //Might be missing somee detail in inheritance but even if make sure it's CollectItems type it won't let me call
+        public virtual void dropItem(GameObject enemyKilled)
+        { }
+
         public virtual short GoalAmount
         {
             set

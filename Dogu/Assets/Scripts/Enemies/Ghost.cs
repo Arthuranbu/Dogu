@@ -10,6 +10,7 @@ namespace Dogu
         public override void PrepareEnemy()
         {
             base.PrepareEnemy();
+            itemToDrop = Resources.Load<GameObject>("Prefabs/GhostDrop");
             enemyStats.speedAmp = 10.0f;
    
         }
@@ -28,11 +29,6 @@ namespace Dogu
 
             if (!inVicinity && currentState != GeneralUse.CurrentAnimState.ATTACKING)
             {
-
-                /* float direction = 1.0f;
-                 if (player.transform.position.x - transform.position.x < 0)
-                     direction *= -1;*/
-                //float direction = player.transform.position.x - transform.position.x;
                 Vector2 myPos = new Vector2(transform.position.x, transform.position.y);
                 Vector2 targetPos = new Vector2(player.transform.position.x, player.transform.position.y);
 
