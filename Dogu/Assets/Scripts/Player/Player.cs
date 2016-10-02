@@ -8,11 +8,13 @@ namespace Dogu
     {
        
         Animator playerAnims;
-
+        bool isAttacking;
         #region PlayerHealth Vars 
         public GeneralUse.Stats playerStats;
         GameObject[] healthMeters;
         IEnumerator currentHeart;
+        float invincibilityFrames = 1.0f;
+        float leftInvincible;
         #endregion
         #region Player States
         bool _isShooting;
@@ -49,6 +51,7 @@ namespace Dogu
         
         void Start()
         {
+            leftInvincible = invincibilityFrames;
             doguSprite = GameObject.Find("DoguSprite").GetComponent<SpriteRenderer>();
             firePoint = GameObject.Find("FirePoint").GetComponent<Transform>();
             blastPrefab = Resources.Load("Prefabs/DoguRangedAttack") as GameObject;
@@ -71,14 +74,18 @@ namespace Dogu
         void Update()
         {
             GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
-            if (Input.GetAxis("Attack") > 0)
+            if (Input.GetAxis("Attack") > 0 )
                 Attack();
-            if (Input.GetAxis("RangedAtk") > 0 && !_isShooting)
+            else if (Input.GetAxis("RangedAtk") > 0 && !_isShooting)
                 StartCoroutine(rangedAttack());
+          
             if (!_isDead)
                 playerMovement();
             //for debugging.
-            
+            if (leftInvincible > 0)
+            {
+                leftInvincible -= Time.deltaTime;
+            }
             if (!OnFloor && _doneJumping)
             {
                 transform.Translate(-transform.up * (GeneralUse.GRAVITY * 2) * Time.deltaTime);
@@ -142,11 +149,15 @@ namespace Dogu
             float jumpAmp = 1.0f;
 
             if (_doneJumping)
+            {
                 _doneJumping = false;
+                currentState = GeneralUse.CurrentAnimState.JUMP;
+            }
             else if (!_doneJumping && _singleJumping)
             {
-                Debug.Log("I'm double jumping! I'm doing it!");
                 _doubleJumping = true;
+                currentState = GeneralUse.CurrentAnimState.DOUBLEJUMP;
+
                 jumpAmp += 5.0f;
             }
             Vector3 initPos = transform.position;
@@ -175,13 +186,18 @@ namespace Dogu
         void Attack()
         {
             currentState = GeneralUse.CurrentAnimState.ATTACKING;
-            
+            GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
+
+        }
+        void playAttackAnim()
+        {
+            playerAnims.SetTrigger(GeneralUse.animStates[currentState]);
         }
         IEnumerator rangedAttack()
         {
             _isShooting = true;
-            currentState = GeneralUse.CurrentAnimState.SHOOTING;
-            
+           
+
 
             if (blastInstance == null)
                 blastInstance = Instantiate(blastPrefab);
@@ -201,19 +217,23 @@ namespace Dogu
                 directionShot = -1.0f;
                 blastInstance.GetComponent<SpriteRenderer>().flipX = true;
             }
-            yield return new WaitForSeconds(playerAnims.speed);
-            
 
+            
+            currentState = GeneralUse.CurrentAnimState.SHOOTING;
+            GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
             blastInstance.transform.position = firePoint.position;
             blastInstance.transform.rotation = firePoint.rotation;
             blastInstance.SetActive(true);
+            
             float blastLife = 0;
             //either use blastlife as or statement to kill blast over time, OR since going to have levelInteractions script, could just let death area handle it.
             do
             {
                blastInstance.transform.Translate(transform.right * directionShot * Time.deltaTime * 20);
                 yield return new WaitForEndOfFrame();
-
+                blastLife += Time.deltaTime;
+                if (blastLife > 5.0f) 
+                    blastInstance.SetActive(false);
             } while (blastInstance.activeInHierarchy);
             
             //Destroy(tempInstance);
@@ -226,12 +246,15 @@ namespace Dogu
         {
             if (!Dead)
             {
-                Debug.Log(((GameObject)currentHeart.Current).name);
-                PlayHUDAnimation(currentHeart.Current as GameObject, "HPLoss");
-                if (!currentHeart.MoveNext())
+                if (leftInvincible <= 0)
                 {
-                    Die();
-                    Debug.Log("Player is dead,stop hitting me");
+                    PlayHUDAnimation(currentHeart.Current as GameObject, "HPLoss");
+                    leftInvincible = invincibilityFrames;
+                    if (!currentHeart.MoveNext())
+                    {
+                        Die();
+                        Debug.Log("Player is dead,stop hitting me");
+                    }
                 }
             }
         }
@@ -247,14 +270,15 @@ namespace Dogu
         {
             Dead = true;
             currentState = GeneralUse.CurrentAnimState.DYING;
-           
+            GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
+
+
         }
 
-        
+
         //Move this to 
         public void Spawn()
         {
-            Dead = false;
             //Have to get these references here, because call when come back from mainmenu, even though new instance, and thus should call start again and get these references, for whatever reason it doesn't soo yeah.
             healthMeters = GameObject.FindGameObjectsWithTag("PlayerHealth");
             currentHeart = healthMeters.GetEnumerator();
@@ -264,30 +288,30 @@ namespace Dogu
                 PlayHUDAnimation(heart, "HPGain");
             }
             //Sweet perfectly in sync naturally, I don't have to put any delay/speed anything up.
+            if (Dead)
+            {
+                currentState = GeneralUse.CurrentAnimState.IDLE;
+                GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
+
+            }
+            Dead = false;
 
         }
         
         public GeneralUse.CurrentAnimState currentState
         {
             set; get;
+
         }
-
-
         #endregion
 
-        #region Collision Events
+            #region Collision Events
         void HurtEnemy(GameObject enemyRef)
         {
 
-            if (currentState == GeneralUse.CurrentAnimState.ATTACKING)
-            {
-                Enemy enemyAttacked = enemyRef.GetComponent<Enemy>();
-                if (!enemyAttacked.Dead)
-                {
-                    enemyAttacked.Dead = true;
-                    enemyAttacked.Die();
-                }
-            }
+            Enemy enemyAttacked = enemyRef.GetComponent<Enemy>(); 
+            StartCoroutine(enemyAttacked.Die());
+            
 
         }
         void OnTriggerEnter(Collider other)
@@ -301,18 +325,21 @@ namespace Dogu
             }
             if (other.CompareTag("Enemy"))
             {
-                //  currentState = GeneralUse.CurrentAnimState.ATTACKING;
-                
-                    HurtEnemy(other.gameObject);
+                 currentState = GeneralUse.CurrentAnimState.ATTACKING;
+                    if (currentState == GeneralUse.CurrentAnimState.ATTACKING)
+                        HurtEnemy(other.gameObject);
             }
         }
         void OnTriggerStay(Collider other)
         {
             //Hate copy and past but fuck.
             if (other.CompareTag("Enemy"))
+                 currentState = GeneralUse.CurrentAnimState.ATTACKING;
             {
-                HurtEnemy(other.gameObject);
+                if (currentState == GeneralUse.CurrentAnimState.ATTACKING)
+                    HurtEnemy(other.gameObject);
             }
+            
         }
         void OnTriggerExit(Collider other)
         {

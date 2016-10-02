@@ -31,6 +31,9 @@ namespace Dogu
 
         protected GameObject itemToDrop;
 
+        public string itemDropName
+        { set; get; }
+        
         public bool Prepped
         { get; set; }
 
@@ -54,6 +57,7 @@ namespace Dogu
         //Make this a coroutine so not all stacked together incase of spawning in same place, low chance but chance.
         public virtual void PrepareEnemy()
         {
+            itemToDrop = Resources.Load<GameObject>("Prefabs/" + itemDropName);
             player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
             Prepped = true;
             enemyAnims = GetComponentInChildren<Animator>();
@@ -62,20 +66,27 @@ namespace Dogu
         public bool Dead
         { get; set; }
 
-        public void Die()
+        public IEnumerator Die()
         {
+
             currentState = GeneralUse.CurrentAnimState.DYING;
+            GeneralUse.playAnim(enemyAnims, GeneralUse.animStates[currentState]);
+
             if (gameManager.currentGameType is CollectItems)
             {
                 gameManager.currentGameType.dropItem(this.gameObject);
             }
 
-            if (gameManager.currentGameType.GoalTarget == GetComponent<Enemy>())
+            if (gameManager.currentGameType.targetName + "(Clone)" == gameObject.name)
             {
                 gameManager.currentGameType.GoalAmount--;
+                Debug.Log(gameManager.currentGameType.GoalAmount);
+                gameManager.UpdateUI();
             }
+            Dead = true;
+            yield return new WaitForSeconds(enemyAnims.speed * 2);
             if (!doingPostAction)
-                StartCoroutine(PostAnimActions());
+                PostAnimActions();
             
         }
 
@@ -84,8 +95,8 @@ namespace Dogu
 
         void Awake()
         {
-            
-            updateProgress = GameObject.Find("GameManager").GetComponent<IGameType>();
+
+            gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         }
 
         // Use this for initialization
@@ -101,7 +112,7 @@ namespace Dogu
        
         protected virtual void Update()
         {
-            if (Prepped)
+            if (Prepped && !Dead)
             {
                 EnemyMovement();
                 GeneralUse.playAnim(enemyAnims,GeneralUse.animStates[currentState]);
@@ -143,7 +154,7 @@ namespace Dogu
         #region On Collision Events
         protected virtual void OnTriggerEnter(Collider other)
         {
-            if (other.CompareTag("Player") && !Dead && player.OnFloor)
+            if (other.CompareTag("Player") && !Dead)
             {
                 stillInRange = true;
 
@@ -151,22 +162,21 @@ namespace Dogu
 
                 if (!doingPostAction)
                 {
-                    StartCoroutine(PostAnimActions());
+                    PostAnimActions();
                 }
             }
         }
         //Virtual because spearmen will probably run instead of keep attacking to stay ranged
         protected virtual void OnTriggerStay(Collider other)
         {
-            if (other.CompareTag("Player") && !Dead && player.OnFloor)
+            if (other.CompareTag("Player") && !Dead)
             {
                 stillInRange = true;
                 currentState = GeneralUse.CurrentAnimState.ATTACKING;
-                
                 if (!doingPostAction)
                 {
-                    
-                    StartCoroutine(PostAnimActions());
+
+                    PostAnimActions();
                 }
             }
         }
@@ -178,7 +188,7 @@ namespace Dogu
             {
                 stillInRange = false;
                 if (!doingPostAction)
-                    StartCoroutine(PostAnimActions());
+                    PostAnimActions();
             }
         }
         //So I'll put all in this and what happens after the yield all depends on argument I pass into here, this can work. Prob currentState
@@ -193,24 +203,18 @@ namespace Dogu
             get;//Going to add more to this too 
         }
    
-        IEnumerator PostAnimActions()
+        void PostAnimActions()
         {
             //Speed is equal to whatever current state is. Would have get stateinfo if 
             //had multiple errors but it auto sees only one and sees that as default layer
             //and gets that.
             doingPostAction = true;
             GeneralUse.CurrentAnimState prevState = currentState;
-            if (Dead)
-                Debug.Log(currentState);
-            if (currentState != GeneralUse.CurrentAnimState.DYING)
-                yield return new WaitForSeconds(enemyAnims.speed / 2);
-            else
-                yield return new WaitForSeconds(enemyAnims.speed);
+            
             switch (currentState)
             {
                 case GeneralUse.CurrentAnimState.ATTACKING:
                     {
-
                         if (stillInRange)
                         {
                             player.DecreasePlayerHP();
@@ -221,16 +225,8 @@ namespace Dogu
                     break;
                 case GeneralUse.CurrentAnimState.DYING:
                     {
-                        if (prevState == GeneralUse.CurrentAnimState.ATTACKING)
-                            yield return new WaitForSeconds(enemyAnims.speed);
-                        if (this == updateProgress.GoalTarget)
-                        {
-                            updateProgress.GoalAmount--;
-                            if (gameManager.currentGameType == new CollectItems())
-                                dropItem();
-                            
-                        }
-                        Destroy(gameObject);
+                        if (this != null)
+                         gameObject.SetActive(false);
                     }
                         break;
             }
@@ -245,9 +241,9 @@ namespace Dogu
         #endregion
         void dropItem()
         {
-           
-            string itemToDrop = GeneralUse.droppedItems[this];
-            GameObject droppedItem = Instantiate(Resources.Load<GameObject>("Prefabs/Items/" + itemToDrop));
+
+            
+            GameObject droppedItem = Instantiate(Resources.Load<GameObject>("Prefabs/Items/" + itemDropName));
             //Spawns the instantiated dropped item to where the enemy just killed was.
             droppedItem.transform.position = transform.position;
         }

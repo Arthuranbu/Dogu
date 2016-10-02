@@ -10,8 +10,9 @@ namespace Dogu
         public override void PrepareEnemy()
         {
             base.PrepareEnemy();
-            itemToDrop = Resources.Load<GameObject>("Prefabs/GhostDrop");
-            enemyStats.speedAmp = 10.0f;
+            itemDropName = "GhostDrop";
+
+            enemyStats.speedAmp = 20.0f;
    
         }
 

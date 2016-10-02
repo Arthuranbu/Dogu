@@ -10,7 +10,7 @@ namespace Dogu
         
         public override void prepareGame()
         {
-            GoalAmount = 5;
+            base.prepareGame();
           
         }
         void Start()

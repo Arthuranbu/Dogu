@@ -4,12 +4,13 @@ namespace Dogu
 {
     public class Items : MonoBehaviour
     {
-
         void OnTriggerEnter(Collider other)
         {
             if (other.CompareTag("Player"))
             {
-                GameObject gameManager = GameObject.Find("")
+                GameManager gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+                if (this.gameObject.name == gameManager.currentGameType.targetName + "(Clone)")
+                    Debug.Log("dfd");
             }
         }
     }

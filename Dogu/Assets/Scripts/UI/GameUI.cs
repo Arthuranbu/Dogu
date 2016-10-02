@@ -8,20 +8,21 @@ public class GameUI : MonoBehaviour {
     GameObject gameUI;
     GameObject waveNoticeUI;
     GameObject deathScreenUI;
+    GameObject wonGameUI;
 
+    Text showGoalUI;
     Text progressInfo;
-    Text waveInfo;
 
     private short _currentProgress;
 
     // Use this for initialization
     void Awake()
     {
+        wonGameUI = GameObject.Find("WonGameUI");
         mainMenuUI = GameObject.Find("MainMenu");
         gameUI = GameObject.Find("GameUI");
         deathScreenUI = GameObject.Find("DeathScreen");
-
-        waveInfo = GameObject.Find("WaveNumber").GetComponent<Text>();
+        showGoalUI = GameObject.Find("DisplayGoal").GetComponent<Text>();
         progressInfo = GameObject.Find("ProgressInfo").GetComponent<Text>();
     }
 
@@ -32,12 +33,26 @@ public class GameUI : MonoBehaviour {
         updateProgressInfo();
         deathScreenUI.SetActive(false);
     }
+    public void WonGameUI()
+    {
+        wonGameUI.SetActive(true);
+    }
+
+    public IEnumerator ShowGoal(string goal)
+    {
+        Debug.Log(goal);
+        showGoalUI.text = string.Format("Target: {0}", goal);
+        yield return new WaitForSeconds(2.0f);
+        showGoalUI.transform.parent.gameObject.SetActive(false);
+    }
+
     public void EndGameUI()
     {
         deathScreenUI.SetActive(true);
     }
     public void MainMenuUI()
     {
+        wonGameUI.SetActive(false);
         mainMenuUI.SetActive(true);
         gameUI.SetActive(false);
         deathScreenUI.SetActive(false);
