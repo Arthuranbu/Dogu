@@ -12,7 +12,6 @@ namespace Dogu
         //Might need to add delay a bit
         //  I should have a handler class that handles this, but will write that later, that's more of a polish.
         protected Player player;
-        protected IGameType updateProgress;
 
         //Okay so no Enemy ref in game manager so not circularly dependant, so even in rush did atleast that right.
         protected GameManager gameManager;
@@ -59,8 +58,9 @@ namespace Dogu
         {
             itemToDrop = Resources.Load<GameObject>("Prefabs/" + itemDropName);
             player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-            Prepped = true;
             enemyAnims = GetComponentInChildren<Animator>();
+            Prepped = true;
+           
         }
 
         public bool Dead
@@ -74,16 +74,13 @@ namespace Dogu
 
             if (gameManager.currentGameType is CollectItems)
             {
-                gameManager.currentGameType.dropItem(this.gameObject);
+                dropItem();
             }
 
             if (gameManager.currentGameType.targetName + "(Clone)" == gameObject.name)
             {
-                gameManager.currentGameType.GoalAmount--;
-                Debug.Log(gameManager.currentGameType.GoalAmount);
-                gameManager.UpdateUI();
+                gameManager.UpdateProgress();
             }
-            Dead = true;
             yield return new WaitForSeconds(enemyAnims.speed * 2);
             if (!doingPostAction)
                 PostAnimActions();
@@ -209,7 +206,7 @@ namespace Dogu
             //had multiple errors but it auto sees only one and sees that as default layer
             //and gets that.
             doingPostAction = true;
-            GeneralUse.CurrentAnimState prevState = currentState;
+
             
             switch (currentState)
             {
@@ -243,7 +240,7 @@ namespace Dogu
         {
 
             
-            GameObject droppedItem = Instantiate(Resources.Load<GameObject>("Prefabs/Items/" + itemDropName));
+            GameObject droppedItem = Instantiate(Resources.Load<GameObject>("Prefabs/" + itemDropName));
             //Spawns the instantiated dropped item to where the enemy just killed was.
             droppedItem.transform.position = transform.position;
         }

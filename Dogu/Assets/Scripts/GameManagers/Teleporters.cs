@@ -15,7 +15,10 @@ namespace Dogu
         //i COULD EDIT JUST ONE SYSTEM AND SAVE THE ALL THE NUMBERS AND PROPERTIES OF IT, SO CHANGE KIND OF PARTICLES PROGRAMATICALLY BUT
         //THIS IS EASIER, MIGHT CHANGE LATER AND PARTICLES AREN'T A BIG PRIORITY.
 
-      
+        void Awake()
+        {
+            idleParticles = GameObject.Find("IdleTeleporter").GetComponent<ParticleSystem>();
+        }
 
         //Will make this a coroutine then not instant teleport but just really fast and that will also give time for particle systems to play
         IEnumerator Teleport(Transform teleportee)
@@ -39,8 +42,13 @@ namespace Dogu
            // leaveParticles.Play();
 
         }
+        void Update()
+        {
+            idleParticles.Play();
+        }
         void OnTriggerEnter(Collider other)
         {
+
             StartCoroutine(Teleport(other.transform));
         }
     }

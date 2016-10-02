@@ -73,14 +73,18 @@ namespace Dogu
         // Update is called once per frame
         void Update()
         {
-            GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
-            if (Input.GetAxis("Attack") > 0 )
+            Debug.Log(currentState);
+
+            
+            if (Input.GetAxis("Attack") > 0)
                 Attack();
             else if (Input.GetAxis("RangedAtk") > 0 && !_isShooting)
                 StartCoroutine(rangedAttack());
-          
+            else if (playerAnims.GetCurrentAnimatorStateInfo(0).IsName("Dogu" + GeneralUse.animStates[GeneralUse.CurrentAnimState.IDLE]))
+                currentState = GeneralUse.CurrentAnimState.IDLE;
             if (!_isDead)
                 playerMovement();
+            GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
             //for debugging.
             if (leftInvincible > 0)
             {
@@ -89,12 +93,7 @@ namespace Dogu
             if (!OnFloor && _doneJumping)
             {
                 transform.Translate(-transform.up * (GeneralUse.GRAVITY * 2) * Time.deltaTime);
-                if (transform.position.y == GameObject.Find("FloorStart").transform.position.y)
-                {
-                    OnFloor = true;
-                    _doubleJumping = false;
-                    _singleJumping = false;
-                }
+              
             }
                 
         }
@@ -106,11 +105,12 @@ namespace Dogu
             bool jumped = Input.GetKeyDown(KeyCode.Space);
             direction = Input.GetAxis("Horizontal");
 
-            currentState = GeneralUse.CurrentAnimState.MOVING;
             transform.Translate(transform.right * direction * Time.deltaTime * playerStats.speedAmp);
             if (direction != 0)
             {
-                
+                currentState = GeneralUse.CurrentAnimState.MOVING;
+
+
                 firePoint.localPosition *= direction;
                 if (direction < 0)
                 {
@@ -121,13 +121,12 @@ namespace Dogu
                 else
                 {
                     firePoint.eulerAngles = Vector3.zero;
-                    firePoint.localPosition += new Vector3(3.0f,0,0);
+                    firePoint.localPosition += new Vector3(3.0f, 0, 0);
                     doguSprite.flipX = false;
                 }
-                
+
             }
-            else
-                    currentState = GeneralUse.CurrentAnimState.STOPPING;
+            
             if (jumped)
             {
                 if (_doneJumping && _onFloor)
@@ -186,7 +185,7 @@ namespace Dogu
         void Attack()
         {
             currentState = GeneralUse.CurrentAnimState.ATTACKING;
-            GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
+           // GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
 
         }
         void playAttackAnim()
@@ -220,7 +219,7 @@ namespace Dogu
 
             
             currentState = GeneralUse.CurrentAnimState.SHOOTING;
-            GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
+            //GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
             blastInstance.transform.position = firePoint.position;
             blastInstance.transform.rotation = firePoint.rotation;
             blastInstance.SetActive(true);
@@ -270,7 +269,7 @@ namespace Dogu
         {
             Dead = true;
             currentState = GeneralUse.CurrentAnimState.DYING;
-            GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
+            //GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
 
 
         }
@@ -309,13 +308,20 @@ namespace Dogu
         void HurtEnemy(GameObject enemyRef)
         {
 
-            Enemy enemyAttacked = enemyRef.GetComponent<Enemy>(); 
+            Enemy enemyAttacked = enemyRef.GetComponent<Enemy>();
+            enemyAttacked.Dead = true;
             StartCoroutine(enemyAttacked.Die());
             
 
         }
         void OnTriggerEnter(Collider other)
         {
+            if (other.CompareTag("Threshhold") && currentState == GeneralUse.CurrentAnimState.MOVING)
+            {
+                CameraManager moveCamera = GameObject.Find("GameManager").GetComponent<CameraManager>();
+                if (!moveCamera.CameraMoving)
+                    StartCoroutine(moveCamera.MoveCamera(direction));
+            }
             //Might make weapon script, and have it handle there on the cone collider I was thinking about, but for now just to make it playable.
 
             if (other.CompareTag("Floor"))
@@ -325,24 +331,35 @@ namespace Dogu
             }
             if (other.CompareTag("Enemy"))
             {
-                 currentState = GeneralUse.CurrentAnimState.ATTACKING;
-                    if (currentState == GeneralUse.CurrentAnimState.ATTACKING)
-                        HurtEnemy(other.gameObject);
+                if (currentState == GeneralUse.CurrentAnimState.ATTACKING)
+                    HurtEnemy(other.gameObject);
             }
         }
         void OnTriggerStay(Collider other)
         {
+            
+            if (other.CompareTag("Floor"))
+            {
+                _onFloor = true;
+
+            }
             //Hate copy and past but fuck.
             if (other.CompareTag("Enemy"))
-                 currentState = GeneralUse.CurrentAnimState.ATTACKING;
             {
-                if (currentState == GeneralUse.CurrentAnimState.ATTACKING)
+
+                if (currentState == GeneralUse.CurrentAnimState.ATTACKING && (other.gameObject.GetComponent<Enemy>().Dead == false))
                     HurtEnemy(other.gameObject);
             }
             
         }
         void OnTriggerExit(Collider other)
         {
+            if (other.CompareTag("Threshhold") && currentState == GeneralUse.CurrentAnimState.MOVING)
+            {
+                CameraManager moveCamera = GameObject.Find("GameManager").GetComponent<CameraManager>();
+                if (!moveCamera.CameraMoving)
+                    StartCoroutine(moveCamera.MoveCamera(direction));
+            }
             if (other.CompareTag("Floor"))
                 _onFloor = false;
             

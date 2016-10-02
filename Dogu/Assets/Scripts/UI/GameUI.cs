@@ -30,7 +30,6 @@ public class GameUI : MonoBehaviour {
     {
         mainMenuUI.SetActive(false);
         gameUI.SetActive(true);
-        updateProgressInfo();
         deathScreenUI.SetActive(false);
     }
     public void WonGameUI()
@@ -40,7 +39,7 @@ public class GameUI : MonoBehaviour {
 
     public IEnumerator ShowGoal(string goal)
     {
-        Debug.Log(goal);
+
         showGoalUI.text = string.Format("Target: {0}", goal);
         yield return new WaitForSeconds(2.0f);
         showGoalUI.transform.parent.gameObject.SetActive(false);
@@ -57,21 +56,21 @@ public class GameUI : MonoBehaviour {
         gameUI.SetActive(false);
         deathScreenUI.SetActive(false);
     }
-    
-    public short currentProgress {
+
+
+    public short currentProgress
+    {
         set
         {
             _currentProgress = value;
-            updateProgressInfo();
         }
         get { return _currentProgress; }
+
     }
 
-    public short goalProgress { set; get; }
-
-    private void updateProgressInfo()
+    public void updateProgressInfo(short current,short goal)
     {
-        string progressText = string.Format("{0}/{1}", currentProgress, goalProgress);
+        string progressText = string.Format("{0}/{1}", current, goal);
         progressInfo.text = progressText;
     }
 }

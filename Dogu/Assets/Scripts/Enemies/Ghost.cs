@@ -30,7 +30,7 @@ namespace Dogu
 
             if (!inVicinity && currentState != GeneralUse.CurrentAnimState.ATTACKING)
             {
-                Vector2 myPos = new Vector2(transform.position.x, transform.position.y);
+
                 Vector2 targetPos = new Vector2(player.transform.position.x, player.transform.position.y);
 
                 transform.position = Vector3.MoveTowards(transform.position, targetPos, Time.deltaTime * enemyStats.speedAmp);

@@ -17,9 +17,10 @@ namespace Dogu
         public override void prepareGame()
         {
             base.prepareGame();
+            targetName += "Drop";
             increaseDifficulty();
         }
-      
+       
 
 
     }
