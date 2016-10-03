@@ -13,10 +13,8 @@ namespace Dogu
 
         public override void prepareGame()
         {
-            
-            int enemyIndex = Random.Range(0, GeneralUse.allEnemies.Length);
-            GoalTarget = GeneralUse.allEnemies[enemyIndex];
-            targetName = GeneralUse.allEnemyNames[enemyIndex];
+            base.prepareGame();
+           
         }
      
         

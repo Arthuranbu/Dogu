@@ -8,11 +8,7 @@ namespace Dogu
 {
     public class GameManager : MonoBehaviour
     {
-        //Todo: add levelManager struct or class, but that's polishing wave generation, for now keep simple first.
-        CollectItems collectingGame;
-        HuntEnemy huntingGame;
-        ClearWave waveGame;
-
+        bool checkingDeath;
         GameUI manageUI;
         bool GameStarted;
         #region Cameras
@@ -24,19 +20,11 @@ namespace Dogu
         Transform playerSpawnPoint;
         #endregion
         //Need to move all this to a gameUI class.
-        #region UI
-        GameObject mainMenuUI;
-        GameObject gameUI;
-        GameObject waveNoticeUI;
-
-        Text progressInfo;
-        Text waveInfo;
-        GameObject deathScreenUI;
-        #endregion
+       
 
         #region Enemy Variables
         //bool currentlyChecking;
-        EnemySpawner enemyRef;
+        EnemySpawner enemySpawner;
         List<GameObject> enemiesInScene;
         private int _wave;
         private int nEnemiesToSpawn;
@@ -46,10 +34,9 @@ namespace Dogu
         IEnumerator StartingNextWave()
         {
            // waveInfo.text = string.Format("Wave {0}", Wave);
-            waveInfo.transform.parent.gameObject.SetActive(true);
+
             yield return new WaitForSeconds(2.0f);
 
-            waveInfo.transform.parent.gameObject.SetActive(false);
         }
         public IGameType currentGameType
         {
@@ -60,9 +47,6 @@ namespace Dogu
 
         void Awake()
         {
-            huntingGame = GetComponent<HuntEnemy>();
-            collectingGame = GetComponent<CollectItems>();
-            waveGame = GetComponent<ClearWave>();
 
             manageUI = GetComponent<GameUI>();
 
@@ -70,9 +54,9 @@ namespace Dogu
             DoguPrefab = Resources.Load("Prefabs/Dogu") as GameObject;
             playerSpawnPoint = GameObject.Find("PlayerSpawn").GetComponent<Transform>();
 
-            manageCameras = GameObject.Find("LevelThreshhold").GetComponent<CameraManager>();
+            manageCameras = GetComponent<CameraManager>();
             
-            enemyRef = GetComponent<EnemySpawner>();
+            enemySpawner = GetComponent<EnemySpawner>();
            
         }
         void Start()
@@ -84,26 +68,31 @@ namespace Dogu
 
         IEnumerator SetEnemiesToSpawn(int enemyCount)
         {
+            Vector3 prevSpawnPos = new Vector3();// = 0;
             for (int es = 0; es < enemyCount; ++es)
             {
-
-                string enemyToSpawn = GeneralUse.allEnemyNames[Random.Range(0, GeneralUse.allEnemyNames.Length)];
-                GameObject enemySpawned = enemyRef.SpawnEnemy(enemyToSpawn);
-                SetEnemySpawnLocation(enemyToSpawn, enemySpawned);
+                string enemyToSpawn = "Ghost";
+                //string enemyToSpawn = GeneralUse.enemyNames[Random.Range(0, GeneralUse.enemyNames.Length)];
+                GameObject enemySpawned = enemySpawner.SpawnEnemy(enemyToSpawn);
                 enemiesInScene.Add(enemySpawned);
+                Vector3 newPos = GetEnemySpawnLocation(enemyToSpawn);
+                if (newPos != prevSpawnPos)
+                    enemySpawned.transform.position = newPos;
+                else
+                    enemySpawned.transform.position = newPos + new Vector3(1, 0, 0) * Random.Range(1, 4);
+                prevSpawnPos = newPos;
+                yield return new WaitForSeconds(0.1f);
+            }
+            PrepareEnemies();
+            GameStarted = true;
 
-            }
-            foreach (GameObject enemy in enemiesInScene)
-            {
-                enemy.GetComponent<Enemy>().PrepareEnemy();
-                yield return new WaitForEndOfFrame();
-            }
         }
-        
-        void SetEnemySpawnLocation(string enemyToSpawn, GameObject enemySpawned)
+
+        Vector3 GetEnemySpawnLocation(string enemyToSpawn)
         {
             GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag(enemyToSpawn + "Spawn");
-            enemySpawned.transform.position = spawnPoints[Random.Range(0, spawnPoints.Length)].GetComponent<Transform>().position;
+            int spawnIndex = Random.Range(0, spawnPoints.Length);
+            return spawnPoints[spawnIndex].transform.position;
         }
        
         void PrepareEnemies()
@@ -119,24 +108,22 @@ namespace Dogu
             switch (gameType)
             {
                 case "Hunt":
-                    currentGameType = huntingGame;
+                    currentGameType = new HuntEnemy();
                     break;
                 case "Clear":
-                    currentGameType = waveGame;
-                    
+                    currentGameType = new ClearWave();
                     break;
                 case "Collect":
-                    currentGameType = collectingGame;
+                    currentGameType = new CollectItems();
                     break;
             }
             currentGameType.prepareGame();
+
             //Setting up UI
-            manageUI.goalProgress = currentGameType.GoalAmount;
+            manageUI.currentProgress = 0;
+            manageUI.updateProgressInfo(manageUI.currentProgress,currentGameType.GoalAmount);
             manageUI.StartGameUI();
-         
-
-     
-
+            StartCoroutine(manageUI.ShowGoal(currentGameType.targetName));
             manageCameras.switchCameras();
 
             //Setting player up
@@ -147,17 +134,39 @@ namespace Dogu
             //Even amount of all or have randon on what will spawnper wave.
             //Could have this be loop then randomize each time rather than loop inside the spawn enemy function itself.
             StartCoroutine(SetEnemiesToSpawn(5));
-            GameStarted = true;
         }
-        
+        public void UpdateProgress()
+        {
+
+            manageUI.currentProgress++;// = currentGameType.GoalAmount;
+            Debug.Log(manageUI.currentProgress);
+            manageUI.updateProgressInfo(manageUI.currentProgress, currentGameType.GoalAmount);
+            if (manageUI.currentProgress >= currentGameType.GoalAmount)
+            {
+                manageUI.currentProgress = currentGameType.GoalAmount;
+                
+                winGame();
+            }
+        }
         public void RestartGame()
         {
+            manageUI.StartGameUI();
             playerRef.Spawn();
             playerRef.transform.localPosition = playerSpawnPoint.localPosition;
-            SetEnemiesToSpawn(5);
+            StartCoroutine(SetEnemiesToSpawn(5));
+            
 
         }
+        void winGame()
+        {
+            GameStarted = false;
+            foreach (GameObject enemy in enemiesInScene)
+            {
+                Destroy(enemy);
 
+            }
+            manageUI.WonGameUI();
+        }
         public void BackToMainMenu()
         {
             manageUI.MainMenuUI();
@@ -170,33 +179,68 @@ namespace Dogu
             //temporary check in Update, just to increase spawns and get waves going for now.
             if (GameStarted)
             {
-                StartCoroutine(CheckDead());
-
+                if (playerRef.Dead && !checkingDeath)
+                    StartCoroutine(CheckDead());
+              
+                if (!playerRef.Dead)
+                    CheckEnemiesLeft();
             }
+         
         }
         
-       
+       void CheckEnemiesLeft()
+        {
+            int stillAlive = 0;
+            foreach (var x in enemiesInScene)
+            {
+                if (x.activeInHierarchy)
+                {
+                    stillAlive++;
+                }
+            }
+            if (!(currentGameType is ClearWave))
+            {
+                if (stillAlive == 1)
+                {
+                    StartCoroutine(SetEnemiesToSpawn(5));
+                }
+            }
+            else
+            {
+                if (stillAlive == 0)
+                {
+                    currentGameType.increaseDifficulty();
+                    UpdateProgress();
+                }
+            }
+        }
 
         IEnumerator CheckDead()
         {
             //Probably bad thread practice getting rid of this, haven't looked too much into threads past what I learned in c++
             //but getting rid of it in this case gets rid of delay with death UI, so it's beneficial. 
-         //   currentlyChecking = true;
+            //   currentlyChecking = true;
 
-            if (playerRef.Dead)
+            checkingDeath = true;
+            manageUI.EndGameUI();
+            //Wait until player respawns
+
+
+            foreach (GameObject enemy in enemiesInScene)
             {
+                Destroy(enemy);
 
-                manageUI.EndGameUI();
-                //Wait until player respawns
-                yield return new WaitUntil(() => !playerRef.Dead);
-
-                foreach (GameObject enemy in enemiesInScene)
-                {
-                    Destroy(enemy);
-                    
-                }
-                
             }
+            GameObject[] itemsDropped = GameObject.FindGameObjectsWithTag("Item");
+            foreach (GameObject item in itemsDropped)
+            {
+                Destroy(item);
+            }
+            enemiesInScene.Clear();
+            GameStarted = false;
+            yield return new WaitUntil(() => !playerRef.Dead);
+            checkingDeath = false;
+
         }
      
 

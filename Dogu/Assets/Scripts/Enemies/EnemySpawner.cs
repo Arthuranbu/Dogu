@@ -8,6 +8,7 @@ namespace Dogu
 
         public GameObject SpawnEnemy(string monsterName)
         {
+            Debug.Log("yo");
             string prefabPath = "Prefabs/";
             prefabPath += monsterName;
             //Does game amanger need reference to all?, well can either check every update or keep reference to it here and check if active.

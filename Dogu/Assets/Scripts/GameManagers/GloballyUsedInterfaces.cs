@@ -49,22 +49,17 @@ namespace Dogu
         {
             IDLE,
             MOVING,
+            JUMP,
+            DOUBLEJUMP,
             STOPPING,
             ATTACKING,
             HIT,
             DYING,
             SHOOTING
         }
-        //Should I make it flags? enums take less time than strings, but going to have to use strings regardless, so basicall same as below.
-        //So is it better If I just use strings straight up then whatever it randomizes to I save that instead of assigning something completely
-        //diff cause again it's same logic of using magic value that has no real purpose other than to be used as a trigger to pass in another 
-        //value, if it's trigger to do an event then it's fine it has a purpose but it's trigger to assign the real trigger to event.
-        public static Enemy[] allEnemies = new Enemy[2]
-        {
-           new Boar(),
-           new Ghost()
-        };
-        public static string[] allEnemyNames = new string[2]
+       
+     
+        public static string[] enemyNames = new string[2]
         {
             "Boar",
             "Ghost"
@@ -79,20 +74,27 @@ namespace Dogu
         }*/
        //Will play states directly, will save triggers and params like that for more specificity.
         ///0:Idle,1:Move,2:Attack,3:Hit,4:Die,5:Shoot
+<<<<<<< HEAD
         public const Dictionary<CurrentAnimState,string> ANIMSTATES = new Dictionary<CurrentAnimState, string>()
+=======
+        public static Dictionary<CurrentAnimState,string> animStates = new Dictionary<CurrentAnimState, string>()
+>>>>>>> c34bbb8ddecd18b1a6a8dbdc98551eecf764dcee
          {
             {CurrentAnimState.IDLE, "Idle" },
             {CurrentAnimState.MOVING, "Move" },
             {CurrentAnimState.STOPPING,"Stop" },
             {CurrentAnimState.ATTACKING, "Attack" },
+            {CurrentAnimState.JUMP,"Jump" },
+            {CurrentAnimState.DOUBLEJUMP,"DoubleJump" },
             {CurrentAnimState.HIT, "Hit" },
             {CurrentAnimState.DYING, "Die"},
             {CurrentAnimState.SHOOTING, "Shoot" }
          };
         public void playAnim(Animator animator, string stateToPlay)
         {
-            animator.SetTrigger(Animator.StringToHash(stateToPlay));
+            animator.SetTrigger(stateToPlay);
         }
+<<<<<<< HEAD
         //Think about what else needs this, and whether I should mov ethis back to just collect items.
         public  const Dictionary<Enemy, string> DROPPEDITEMS = new Dictionary<Enemy, string>
         {
@@ -100,5 +102,8 @@ namespace Dogu
             "BoarDrop",
             "BirdDrop"
         };
+=======
+     
+>>>>>>> c34bbb8ddecd18b1a6a8dbdc98551eecf764dcee
     }
 }

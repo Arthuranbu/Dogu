@@ -6,8 +6,9 @@ namespace Dogu
     public class CameraManager : MonoBehaviour
     {
         Camera mainMenuCamera;
-        Camera mainSceneCamera;
-
+        public Camera mainSceneCamera;
+        public bool CameraMoving
+        { set; get; }
         public void switchCameras()
         {
             if (mainMenuCamera.targetDisplay == 0)
@@ -29,24 +30,24 @@ namespace Dogu
             mainSceneCamera = GameObject.Find("MainSceneCamera").GetComponent<Camera>();
         }
 
-
-        //ToDo: Move panning to separate function and change to do while yield every frame, play with numbers for how much I have to pan it.
-        void OnTriggerStay(Collider other)
-        {     //This will pan the camera in either direction when player hits border
-            if (other.CompareTag("Player"))
+        public IEnumerator MoveCamera(float direction)
+        {
+            CameraMoving = true;
+            bool hitMaxDis;
+     
+            Vector3 initPos = mainSceneCamera.transform.localPosition;
+            do
             {
-                if (other.GetComponent<Player>().currentState == GeneralUse.CurrentAnimState.MOVING)
-                //Will get bg reference and when position reacges certain point then do this.
-                {
+                mainSceneCamera.transform.localPosition += direction * transform.right * Time.deltaTime * 20;
+                hitMaxDis = (direction > 0) ? mainSceneCamera.transform.localPosition.x > initPos.x + 20.0f : (direction < 0) ? mainSceneCamera.transform.localPosition.x < initPos.x - 20.0f : false;
+                yield return new WaitForEndOfFrame();
+              
 
-                    //It's always only doing left.//My dumb ass logic, of course it's other way around holy shit. player is terminal and threshhold is initial.
-                    //Hate having direction just for this but meh,
-                    if (other.GetComponent<Player>().direction > 0)
-                        mainSceneCamera.transform.Translate(transform.right * Time.deltaTime * 20);
-                    else if (other.GetComponent<Player>().direction < 0)
-                        mainSceneCamera.transform.Translate(-transform.right * Time.deltaTime * 20);
-                }
             }
+            while (hitMaxDis == false);
+            CameraMoving = false;
+           
         }
+       
     }
 }

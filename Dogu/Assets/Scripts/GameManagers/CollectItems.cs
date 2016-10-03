@@ -9,25 +9,18 @@ namespace Dogu
         //List is only used in here, but it's always same so should be static and created at compile time, efficiency vs logically makes sense
         //Maybe other classes will need it
         
-        public void dropItem(GameObject enemyKilled)
-        {
-            enemy = enemyKilled.GetComponent<Enemy>();
-            string itemToDrop = GeneralUse.DROPPEDITEMS[enemy];
-            GameObject droppedItem = Instantiate(Resources.Load("Prefabs/Items/" + itemToDrop));
-            //Spawns the instantiated dropped item to where the enemy just killed was.
-            droppedItem.transform.position = enemyKilled.transform.position;
-        }
+        
         public override void increaseDifficulty()
         {
-            GoalAmount = 5;
         }
         
-        public void prepareGame()
+        public override void prepareGame()
         {
-            GoalTarget = GeneralUse.allEnemies[Random.Range(0, GeneralUse.allEnemies.Length)];
+            base.prepareGame();
+            targetName += "Drop";
             increaseDifficulty();
         }
-      
+       
 
 
     }
