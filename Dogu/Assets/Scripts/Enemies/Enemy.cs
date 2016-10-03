@@ -72,15 +72,19 @@ namespace Dogu
             currentState = GeneralUse.CurrentAnimState.DYING;
             GeneralUse.playAnim(enemyAnims, GeneralUse.animStates[currentState]);
 
-            if (gameManager.currentGameType is CollectItems)
-            {
-                dropItem();
-            }
 
-            if (gameManager.currentGameType.targetName + "(Clone)" == gameObject.name)
+            if (gameManager.currentGameType is CollectItems || gameManager.currentGameType is HuntEnemy)
             {
-                gameManager.UpdateProgress();
+                if (gameManager.currentGameType.targetName + "(Clone)" == gameObject.name)
+                {
+                    gameManager.UpdateProgress();
+                }
+                if (gameManager.currentGameType is CollectItems)
+                {
+                    dropItem();
+                }
             }
+            
             yield return new WaitForSeconds(enemyAnims.speed * 2);
             if (!doingPostAction)
                 PostAnimActions();
@@ -162,6 +166,11 @@ namespace Dogu
                     PostAnimActions();
                 }
             }
+            if (other.CompareTag("DoguAttack"))
+            {
+                StartCoroutine(Die());
+                other.gameObject.SetActive(false);
+            }
         }
         //Virtual because spearmen will probably run instead of keep attacking to stay ranged
         protected virtual void OnTriggerStay(Collider other)
@@ -176,6 +185,7 @@ namespace Dogu
                     PostAnimActions();
                 }
             }
+            
         }
         //Virtual because spearmen will start attacking when out of vicinity
 

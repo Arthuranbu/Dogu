@@ -198,9 +198,20 @@ namespace Dogu
                     stillAlive++;
                 }
             }
-            if (stillAlive == 1)
+            if (!(currentGameType is ClearWave))
             {
-                StartCoroutine(SetEnemiesToSpawn(5));
+                if (stillAlive == 1)
+                {
+                    StartCoroutine(SetEnemiesToSpawn(5));
+                }
+            }
+            else
+            {
+                if (stillAlive == 0)
+                {
+                    currentGameType.increaseDifficulty();
+                    UpdateProgress();
+                }
             }
         }
 
@@ -219,6 +230,11 @@ namespace Dogu
             {
                 Destroy(enemy);
 
+            }
+            GameObject[] itemsDropped = GameObject.FindGameObjectsWithTag("Item");
+            foreach (GameObject item in itemsDropped)
+            {
+                Destroy(item);
             }
             enemiesInScene.Clear();
             GameStarted = false;

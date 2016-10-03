@@ -6,11 +6,13 @@ namespace Dogu
     public class ClearWave : IGameType
     {
         public override void increaseDifficulty()
-        { }
+        {
+
+        }
         
         public override void prepareGame()
         {
-            base.prepareGame();
+            targetName = "ClearWaves";
           
         }
         void Start()

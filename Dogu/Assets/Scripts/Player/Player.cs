@@ -219,7 +219,8 @@ namespace Dogu
 
             
             currentState = GeneralUse.CurrentAnimState.SHOOTING;
-            //GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
+            //  GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
+            yield return new WaitForSeconds(playerAnims.speed);
             blastInstance.transform.position = firePoint.position;
             blastInstance.transform.rotation = firePoint.rotation;
             blastInstance.SetActive(true);
