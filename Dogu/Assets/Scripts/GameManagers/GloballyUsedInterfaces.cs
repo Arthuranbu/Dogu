@@ -86,6 +86,7 @@ namespace Dogu
             {CurrentAnimState.DYING, "Die"},
             {CurrentAnimState.SHOOTING, "Shoot" }
          };
+
         public static void playAnim(Animator animator, string stateToPlay)
         {
             animator.SetTrigger(stateToPlay);

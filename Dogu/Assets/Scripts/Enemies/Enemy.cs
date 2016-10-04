@@ -169,7 +169,7 @@ namespace Dogu
             if (other.CompareTag("DoguAttack"))
             {
                 StartCoroutine(Die());
-                other.gameObject.SetActive(false);
+               
             }
         }
         //Virtual because spearmen will probably run instead of keep attacking to stay ranged
@@ -197,6 +197,8 @@ namespace Dogu
                 if (!doingPostAction)
                     PostAnimActions();
             }
+            if (other.CompareTag("DoguAttack"))
+                other.gameObject.SetActive(false);
         }
         //So I'll put all in this and what happens after the yield all depends on argument I pass into here, this can work. Prob currentState
 

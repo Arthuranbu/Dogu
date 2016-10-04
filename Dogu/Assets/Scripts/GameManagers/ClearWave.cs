@@ -12,7 +12,8 @@ namespace Dogu
         
         public override void prepareGame()
         {
-            targetName = "ClearWaves";
+            base.prepareGame();
+            targetName = "All";
           
         }
         void Start()

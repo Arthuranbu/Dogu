@@ -8,7 +8,6 @@ namespace Dogu
        
         public override void increaseDifficulty()
         {
-            GoalAmount = 5;
         }
 
         public override void prepareGame()

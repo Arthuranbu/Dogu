@@ -31,6 +31,7 @@ public class GameUI : MonoBehaviour {
         mainMenuUI.SetActive(false);
         gameUI.SetActive(true);
         deathScreenUI.SetActive(false);
+        wonGameUI.SetActive(false);
     }
     public void WonGameUI()
     {

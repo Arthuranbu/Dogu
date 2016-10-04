@@ -34,7 +34,7 @@ namespace Dogu
         //Should be inside the struct, but enemies aren't jumping right now so won't.
         //Public soley for camera pan
         public float direction;
-        float jumpHeight = 15.0f;
+        float jumpHeight = 20.0f;
 
         public bool Dead
         {
@@ -82,7 +82,7 @@ namespace Dogu
                 StartCoroutine(rangedAttack());
             else if (playerAnims.GetCurrentAnimatorStateInfo(0).IsName("Dogu" + GeneralUse.animStates[GeneralUse.CurrentAnimState.IDLE]))
                 currentState = GeneralUse.CurrentAnimState.IDLE;
-            if (!_isDead)
+            if (!_isDead && !isAttacking)
                 playerMovement();
             GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
             //for debugging.
@@ -114,15 +114,17 @@ namespace Dogu
                 firePoint.localPosition *= direction;
                 if (direction < 0)
                 {
-                    firePoint.eulerAngles = new Vector3(0, 180.0f, 0);
                     firePoint.localPosition -= new Vector3(3.0f, 0, 0);
                     doguSprite.flipX = true;
+                    if (blastInstance != null)
+                        blastInstance.GetComponent<SpriteRenderer>().flipX = true;
                 }
                 else
                 {
-                    firePoint.eulerAngles = Vector3.zero;
                     firePoint.localPosition += new Vector3(3.0f, 0, 0);
                     doguSprite.flipX = false;
+                    if (blastInstance != null)
+                        blastInstance.GetComponent<SpriteRenderer>().flipX = false;
                 }
 
             }
@@ -157,7 +159,7 @@ namespace Dogu
                 _doubleJumping = true;
                 currentState = GeneralUse.CurrentAnimState.DOUBLEJUMP;
 
-                jumpAmp += 5.0f;
+                jumpAmp += 7.0f;
             }
             Vector3 initPos = transform.position;
 
@@ -205,34 +207,25 @@ namespace Dogu
             //Changed so doesn't control it, seems pointless in small area now, but if need to keep jst move inside 
             //do block.
 
-            float directionShot;
-            if (doguSprite.flipX)
-            {
-                directionShot = 1.0f;
-                blastInstance.GetComponent<SpriteRenderer>().flipX = false;
-            }
-            else
-            {
-                directionShot = -1.0f;
-                blastInstance.GetComponent<SpriteRenderer>().flipX = true;
-            }
+            
 
             
             currentState = GeneralUse.CurrentAnimState.SHOOTING;
+            blastInstance.SetActive(false);
             //  GeneralUse.playAnim(playerAnims, GeneralUse.animStates[currentState]);
-            yield return new WaitForSeconds(playerAnims.speed);
+            yield return new WaitForSeconds(playerAnims.speed / 2);
             blastInstance.transform.position = firePoint.position;
-            blastInstance.transform.rotation = firePoint.rotation;
+          //  blastInstance.transform.rotation = firePoint.rotation;
             blastInstance.SetActive(true);
-            
+            float blastDirection = (blastInstance.GetComponent<SpriteRenderer>().flipX) ? -1.0f : 1.0f;
             float blastLife = 0;
             //either use blastlife as or statement to kill blast over time, OR since going to have levelInteractions script, could just let death area handle it.
             do
             {
-               blastInstance.transform.Translate(transform.right * directionShot * Time.deltaTime * 20);
+               blastInstance.transform.Translate(transform.right * blastDirection * Time.deltaTime * 100);
                 yield return new WaitForEndOfFrame();
                 blastLife += Time.deltaTime;
-                if (blastLife > 5.0f) 
+                if (blastLife > 2.0f) 
                     blastInstance.SetActive(false);
             } while (blastInstance.activeInHierarchy);
             
@@ -320,8 +313,8 @@ namespace Dogu
             if (other.CompareTag("Threshhold") && currentState == GeneralUse.CurrentAnimState.MOVING)
             {
                 CameraManager moveCamera = GameObject.Find("GameManager").GetComponent<CameraManager>();
-                if (!moveCamera.CameraMoving)
-                    StartCoroutine(moveCamera.MoveCamera(direction));
+
+                StartCoroutine(moveCamera.MoveCamera(direction));
             }
             //Might make weapon script, and have it handle there on the cone collider I was thinking about, but for now just to make it playable.
 
@@ -358,8 +351,7 @@ namespace Dogu
             if (other.CompareTag("Threshhold") && currentState == GeneralUse.CurrentAnimState.MOVING)
             {
                 CameraManager moveCamera = GameObject.Find("GameManager").GetComponent<CameraManager>();
-                if (!moveCamera.CameraMoving)
-                    StartCoroutine(moveCamera.MoveCamera(direction));
+                StartCoroutine(moveCamera.MoveCamera(direction));
             }
             if (other.CompareTag("Floor"))
                 _onFloor = false;

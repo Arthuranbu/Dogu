@@ -99,7 +99,8 @@ namespace Dogu
         {
             foreach (var x in enemiesInScene)
             {
-                x.GetComponent<Enemy>().PrepareEnemy();
+                if (x != null)
+                    x.GetComponent<Enemy>().PrepareEnemy();
             }
         }
         #region GameManaging functions called by UI
@@ -151,7 +152,9 @@ namespace Dogu
         public void RestartGame()
         {
             manageUI.StartGameUI();
+            manageUI.currentProgress = 0;
             playerRef.Spawn();
+            manageCameras.resetCameraPositions();
             playerRef.transform.localPosition = playerSpawnPoint.localPosition;
             StartCoroutine(SetEnemiesToSpawn(5));
             
@@ -170,6 +173,8 @@ namespace Dogu
         public void BackToMainMenu()
         {
             manageUI.MainMenuUI();
+            manageCameras.switchCameras();
+            manageCameras.resetCameraPositions();
             Destroy(playerRef.gameObject);
         }
         #endregion
@@ -182,7 +187,7 @@ namespace Dogu
                 if (playerRef.Dead && !checkingDeath)
                     StartCoroutine(CheckDead());
               
-                if (!playerRef.Dead)
+                if (playerRef.Dead == false)
                     CheckEnemiesLeft();
             }
          
@@ -193,9 +198,12 @@ namespace Dogu
             int stillAlive = 0;
             foreach (var x in enemiesInScene)
             {
-                if (x.activeInHierarchy)
+                if (x != null)
                 {
-                    stillAlive++;
+                    if (x.activeInHierarchy)
+                    {
+                        stillAlive++;
+                    }
                 }
             }
             if (!(currentGameType is ClearWave))
@@ -209,8 +217,8 @@ namespace Dogu
             {
                 if (stillAlive == 0)
                 {
-                    currentGameType.increaseDifficulty();
                     UpdateProgress();
+                    StartCoroutine(SetEnemiesToSpawn(5));
                 }
             }
         }
@@ -238,7 +246,7 @@ namespace Dogu
             }
             enemiesInScene.Clear();
             GameStarted = false;
-            yield return new WaitUntil(() => !playerRef.Dead);
+            yield return new WaitUntil(() => playerRef.Dead == false);
             checkingDeath = false;
 
         }
