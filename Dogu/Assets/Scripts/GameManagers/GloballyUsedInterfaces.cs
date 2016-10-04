@@ -74,11 +74,11 @@ namespace Dogu
         }*/
        //Will play states directly, will save triggers and params like that for more specificity.
         ///0:Idle,1:Move,2:Attack,3:Hit,4:Die,5:Shoot
-<<<<<<< HEAD
-        public const Dictionary<CurrentAnimState,string> ANIMSTATES = new Dictionary<CurrentAnimState, string>()
-=======
+
+   
+
         public static Dictionary<CurrentAnimState,string> animStates = new Dictionary<CurrentAnimState, string>()
->>>>>>> c34bbb8ddecd18b1a6a8dbdc98551eecf764dcee
+
          {
             {CurrentAnimState.IDLE, "Idle" },
             {CurrentAnimState.MOVING, "Move" },
@@ -90,20 +90,12 @@ namespace Dogu
             {CurrentAnimState.DYING, "Die"},
             {CurrentAnimState.SHOOTING, "Shoot" }
          };
-        public void playAnim(Animator animator, string stateToPlay)
+        public static void playAnim(Animator animator, string stateToPlay)
         {
             animator.SetTrigger(stateToPlay);
         }
-<<<<<<< HEAD
-        //Think about what else needs this, and whether I should mov ethis back to just collect items.
-        public  const Dictionary<Enemy, string> DROPPEDITEMS = new Dictionary<Enemy, string>
-        {
-            "GhostDrop",
-            "BoarDrop",
-            "BirdDrop"
-        };
-=======
-     
->>>>>>> c34bbb8ddecd18b1a6a8dbdc98551eecf764dcee
+
+         
+
     }
 }

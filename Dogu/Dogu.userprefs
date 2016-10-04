@@ -1,9 +1,10 @@
 ﻿<Properties StartupItem="Dogu.CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\GameManagers\GameTypeInterface.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\GameManagers\GloballyUsedInterfaces.cs">
     <Files>
+      <File FileName="Assets\Scripts\GameManagers\GloballyUsedInterfaces.cs" Line="98" Column="9" />
       <File FileName="Assets\Scripts\GameManagers\GameTypeInterface.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\GameManagers\CollectItems.cs" Line="11" Column="1" />
+      <File FileName="Assets\Scripts\GameManagers\CollectItems.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
